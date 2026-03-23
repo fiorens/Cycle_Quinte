@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes - Correctif Accords</title>
+<title>Cycle des Quintes - Correction Finale Accords</title>
 <style>
   :root {
     --text-main: #333;
@@ -177,13 +177,13 @@
     const relativeInfo = document.getElementById('relative-info');
     const chordRow = document.getElementById('chord-row');
 
-    const majorNames = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa♯ / Sol♭", "Ré♭", "La♭", "Mi♭", "Si♭", "Fa"];
-    const minorNames = ["Lam", "Mim", "Sim", "Fa♯m", "Do♯m", "Sol♯m", "Ré♯m / Mi♭m", "Si♭m", "Fam", "Dom", "Solm", "Rém"];
+    const majorNames = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa♯/Sol♭", "Ré♭", "La♭", "Mi♭", "Si♭", "Fa"];
+    const minorNames = ["Lam", "Mim", "Sim", "Fa♯m", "Do♯m", "Sol♯m", "Ré♯m/Mi♭m", "Si♭m", "Fam", "Dom", "Solm", "Rém"];
     
     const armures = [
       "Naturel<br>aucune altération", "1♯<br>Fa♯", "2♯<br>Fa♯, Do♯", "3♯<br>Fa♯, Do♯, Sol♯", 
       "4♯<br>Fa♯, Do♯, Sol♯, Ré♯", "5♯<br>Fa♯, Do♯, Sol♯, Ré♯, La♯", 
-      "6♯ : Fa♯, Do♯, Sol♯, Ré♯, La♯, Mi♯<br>6♭ : Si♭, Mi♭, La♭, Ré♭, Sol♭, Do♭",
+      "6♯ : Fa♯...Mi♯<br>6♭ : Si♭...Do♭",
       "5♭<br>Si♭, Mi♭, La♭, Ré♭, Sol♭", "4♭<br>Si♭, Mi♭, La♭, Ré♭", 
       "3♭<br>Si♭, Mi♭, La♭", "2♭<br>Si♭, Mi♭", "1♭<br>Si♭"
     ];
@@ -234,25 +234,26 @@
       
       if (isMajor) {
         // MAJEUR : I, ii, iii, IV, V, vi, vii°
+        // Pour La (3), ii est Sim (index 2 mineur), iii est Do#m (index 4 mineur)
         chords = [
           majorNames[index],              // I (La)
-          minorNames[p(index, 1)],        // ii (Sim)
-          minorNames[p(index, 2)],        // iii (Do#m)
-          majorNames[p(index, 11)],       // IV (Ré)
+          minorNames[p(index, -1)],       // ii (Sim) -> UN PAS À GAUCHE
+          minorNames[p(index, 1)],        // iii (Do#m) -> UN PAS À DROITE
+          majorNames[p(index, -1)],       // IV (Ré)
           majorNames[p(index, 1)],        // V (Mi)
           minorNames[index],              // vi (Fa#m)
-          majorNames[p(index, 5)] + "°"   // vii° (Sol#°)
+          minorNames[p(index, 2)].replace('m','') + "°" // vii° (Sol#°)
         ];
       } else {
         // MINEUR : i, ii°, III, iv, v, VI, VII
         chords = [
-          minorNames[index],              // i
-          majorNames[p(index, 2)] + "°",  // ii°
-          majorNames[p(index, 11)],       // III
-          minorNames[p(index, 11)],       // iv
-          minorNames[p(index, 1)],        // v
-          majorNames[p(index, 10)],       // VI
-          majorNames[p(index, 11)]        // VII
+          minorNames[index], 
+          minorNames[p(index, 1)].replace('m','') + "°",
+          majorNames[index], 
+          minorNames[p(index, -1)], 
+          minorNames[p(index, 1)], 
+          majorNames[p(index, -1)], 
+          majorNames[p(index, 1)]
         ];
       }
       chordRow.innerHTML = `<tr>${chords.map(c => `<td>${c}</td>`).join('')}</tr>`;

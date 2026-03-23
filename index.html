@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes - Correction Finale Accords</title>
+<title>Cycle des Quintes</title>
 <style>
   :root {
     --text-main: #333;
@@ -75,12 +75,13 @@
 
   .rn-badge {
     position: absolute;
-    width: 20px; height: 20px;
+    width: 22px; height: 22px;
     background-color: var(--yellow-rn);
     color: white;
     border-radius: 50%;
     display: flex; justify-content: center; align-items: center;
     font-size: 0.7rem; font-weight: bold;
+    pointer-events: none;
     --angle-badge: calc(var(--i) * 30deg - 90deg);
     --r-badge: 25px;
     transform: translate(calc(cos(var(--angle-badge)) * var(--r-badge)), calc(sin(var(--angle-badge)) * var(--r-badge)));
@@ -89,11 +90,10 @@
 
   .armure-panel {
     width: 100%; max-width: 600px;
-    text-align: center; padding: 15px; margin-bottom: 10px;
+    text-align: center; padding: 10px; margin-bottom: 10px;
     border-bottom: 2px solid var(--grey-light);
-    font-size: 1.2rem; color: var(--blue-alt); font-weight: 600;
-    line-height: 1.4;
-    min-height: 3.2em;
+    font-size: 1rem; color: var(--blue-alt); font-weight: 500;
+    min-height: 3.5em;
   }
 
   .info-panel {
@@ -102,14 +102,12 @@
     border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;
   }
 
-  .info-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
-
   .chord-table {
     width: 100%; border-collapse: collapse; margin-top: 15px;
     background-color: white; border-radius: 4px; overflow: hidden;
   }
 
-  .chord-table th, .chord-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: center; width: calc(100% / 7); }
+  .chord-table th, .chord-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: center; }
   .chord-table th { background-color: #fafafa; color: var(--grey-dark); font-weight: normal; font-size: 0.8rem; }
 
   @media (min-width: 600px) {
@@ -123,39 +121,39 @@
 
   <div class="wheel-container">
     <div id="cycle" class="cycle-wheel">
-      <div class="note major" style="--i: 0;" data-index="0" data-note="Do">Do</div>
-      <div class="note major" style="--i: 1;" data-index="1" data-note="Sol">Sol</div>
-      <div class="note major" style="--i: 2;" data-index="2" data-note="Ré">Ré</div>
-      <div class="note major" style="--i: 3;" data-index="3" data-note="La">La</div>
-      <div class="note major" style="--i: 4;" data-index="4" data-note="Mi">Mi</div>
-      <div class="note major" style="--i: 5;" data-index="5" data-note="Si">Si</div>
-      <div class="note major" style="--i: 6;" data-index="6" data-note="Fa♯/Sol♭">Fa♯<br>Sol♭</div>
-      <div class="note major" style="--i: 7;" data-index="7" data-note="Ré♭">Ré♭</div>
-      <div class="note major" style="--i: 8;" data-index="8" data-note="La♭">La♭</div>
-      <div class="note major" style="--i: 9;" data-index="9" data-note="Mi♭">Mi♭</div>
-      <div class="note major" style="--i: 10;" data-index="10" data-note="Si♭">Si♭</div>
-      <div class="note major" style="--i: 11;" data-index="11" data-note="Fa">Fa</div>
+      <div class="note major" style="--i: 0;" data-index="0" data-note="C">C</div>
+      <div class="note major" style="--i: 1;" data-index="1" data-note="G">G</div>
+      <div class="note major" style="--i: 2;" data-index="2" data-note="D">D</div>
+      <div class="note major" style="--i: 3;" data-index="3" data-note="A">A</div>
+      <div class="note major" style="--i: 4;" data-index="4" data-note="E">E</div>
+      <div class="note major" style="--i: 5;" data-index="5" data-note="B">B</div>
+      <div class="note major" style="--i: 6;" data-index="6" data-note="F♯/G♭">F♯<br>G♭</div>
+      <div class="note major" style="--i: 7;" data-index="7" data-note="D♭">D♭</div>
+      <div class="note major" style="--i: 8;" data-index="8" data-note="A♭">A♭</div>
+      <div class="note major" style="--i: 9;" data-index="9" data-note="E♭">E♭</div>
+      <div class="note major" style="--i: 10;" data-index="10" data-note="B♭">B♭</div>
+      <div class="note major" style="--i: 11;" data-index="11" data-note="F">F</div>
 
-      <div class="note minor" style="--i: 0;" data-index="0" data-note="Lam">Lam</div>
-      <div class="note minor" style="--i: 1;" data-index="1" data-note="Mim">Mim</div>
-      <div class="note minor" style="--i: 2;" data-index="2" data-note="Sim">Sim</div>
-      <div class="note minor" style="--i: 3;" data-index="3" data-note="Fa♯m">Fa♯m</div>
-      <div class="note minor" style="--i: 4;" data-index="4" data-note="Do♯m">Do♯m</div>
-      <div class="note minor" style="--i: 5;" data-index="5" data-note="Sol♯m">Sol♯m</div>
-      <div class="note minor" style="--i: 6;" data-index="6" data-note="Ré♯m/Mi♭m">Ré♯m<br>Mi♭m</div>
-      <div class="note minor" style="--i: 7;" data-index="7" data-note="Si♭m">Si♭m</div>
-      <div class="note minor" style="--i: 8;" data-index="8" data-note="Fam">Fam</div>
-      <div class="note minor" style="--i: 9;" data-index="9" data-note="Dom">Dom</div>
-      <div class="note minor" style="--i: 10;" data-index="10" data-note="Solm">Solm</div>
-      <div class="note minor" style="--i: 11;" data-index="11" data-note="Rém">Rém</div>
+      <div class="note minor" style="--i: 0;" data-index="0" data-note="Am">Am</div>
+      <div class="note minor" style="--i: 1;" data-index="1" data-note="Em">Em</div>
+      <div class="note minor" style="--i: 2;" data-index="2" data-note="Bm">Bm</div>
+      <div class="note minor" style="--i: 3;" data-index="3" data-note="F♯m">F♯m</div>
+      <div class="note minor" style="--i: 4;" data-index="4" data-note="C♯m">C♯m</div>
+      <div class="note minor" style="--i: 5;" data-index="5" data-note="G♯m">G♯m</div>
+      <div class="note minor" style="--i: 6;" data-index="6" data-note="D♯m/E♭m">D♯m<br>E♭m</div>
+      <div class="note minor" style="--i: 7;" data-index="7" data-note="B♭m">B♭m</div>
+      <div class="note minor" style="--i: 8;" data-index="8" data-note="Fm">Fm</div>
+      <div class="note minor" style="--i: 9;" data-index="9" data-note="Cm">Cm</div>
+      <div class="note minor" style="--i: 10;" data-index="10" data-note="Gm">Gm</div>
+      <div class="note minor" style="--i: 11;" data-index="11" data-note="Dm">Dm</div>
     </div>
   </div>
 
-  <div id="armure-panel" class="armure-panel">Cliquer pour l'armure</div>
+  <div id="armure-panel" class="armure-panel">Sélectionnez une note</div>
 
   <div class="info-panel">
     <div class="info-title">Tonalité : <span id="current-key">-</span></div>
-    <div id="relative-info" style="color: var(--grey-dark); font-size: 0.9rem;"></div>
+    <div id="relative-info" style="color: var(--grey-dark); font-size: 0.9rem; margin-bottom: 10px;"></div>
     
     <table class="chord-table">
       <thead>
@@ -177,94 +175,77 @@
     const relativeInfo = document.getElementById('relative-info');
     const chordRow = document.getElementById('chord-row');
 
-    const majorNames = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa♯/Sol♭", "Ré♭", "La♭", "Mi♭", "Si♭", "Fa"];
-    const minorNames = ["Lam", "Mim", "Sim", "Fa♯m", "Do♯m", "Sol♯m", "Ré♯m/Mi♭m", "Si♭m", "Fam", "Dom", "Solm", "Rém"];
-    
-    const armures = [
-      "Naturel<br>aucune altération", "1♯<br>Fa♯", "2♯<br>Fa♯, Do♯", "3♯<br>Fa♯, Do♯, Sol♯", 
-      "4♯<br>Fa♯, Do♯, Sol♯, Ré♯", "5♯<br>Fa♯, Do♯, Sol♯, Ré♯, La♯", 
-      "6♯ : Fa♯...Mi♯<br>6♭ : Si♭...Do♭",
-      "5♭<br>Si♭, Mi♭, La♭, Ré♭, Sol♭", "4♭<br>Si♭, Mi♭, La♭, Ré♭", 
-      "3♭<br>Si♭, Mi♭, La♭", "2♭<br>Si♭, Mi♭", "1♭<br>Si♭"
+    const majorData = [
+      { name: "C", rel: "Am", chords: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"], arm: "Aucune altération" },
+      { name: "G", rel: "Em", chords: ["G", "Am", "Bm", "C", "D", "Em", "F♯dim"], arm: "1 dièse : F♯" },
+      { name: "D", rel: "Bm", chords: ["D", "Em", "F♯m", "G", "A", "Bm", "C♯dim"], arm: "2 dièses : F♯, C♯" },
+      { name: "A", rel: "F♯m", chords: ["A", "Bm", "C♯m", "D", "E", "F♯m", "G♯dim"], arm: "3 dièses : F♯, C♯, G♯" },
+      { name: "E", rel: "C♯m", chords: ["E", "F♯m", "G♯m", "A", "B", "C♯m", "D♯dim"], arm: "4 dièses : F♯, C♯, G♯, D♯" },
+      { name: "B", rel: "G♯m", chords: ["B", "C♯m", "D♯m", "E", "F♯", "G♯m", "A♯dim"], arm: "5 dièses : F♯, C♯, G♯, D♯, A♯" },
+      { name: "F♯ / G♭", rel: "D♯m / E♭m", chords: ["F♯", "G♯m", "A♯m", "B", "C♯", "D♯m", "E♯dim"], arm: "6 dièses : F♯, C♯, G♯, D♯, A♯, E♯<br>6 bémols : B♭, E♭, A♭, D♭, G♭, C♭" },
+      { name: "D♭", rel: "B♭m", chords: ["D♭", "E♭m", "Fm", "G♭", "A♭", "B♭m", "Cdim"], arm: "5 bémols : B♭, E♭, A♭, D♭, G♭" },
+      { name: "A♭", rel: "Fm", chords: ["A♭", "B♭m", "Cm", "D♭", "E♭", "Fm", "Gdim"], arm: "4 bémols : B♭, E♭, A♭, D♭" },
+      { name: "E♭", rel: "Cm", chords: ["E♭", "Fm", "Gm", "A♭", "B♭", "Cm", "Ddim"], arm: "3 bémols : B♭, E♭, A♭" },
+      { name: "B♭", rel: "Gm", chords: ["B♭", "Cm", "Dm", "E♭", "F", "Gm", "Adim"], arm: "2 bémols : B♭, E♭" },
+      { name: "F", rel: "Dm", chords: ["F", "Gm", "Am", "B♭", "C", "Dm", "Edim"], arm: "1 bémol : B♭" }
     ];
+
+    const minorData = majorData.map((d, i) => ({
+      name: d.rel,
+      rel: d.name,
+      chords: [d.chords[5], d.chords[6], d.chords[0], d.chords[1], d.chords[2], d.chords[3], d.chords[4]],
+      arm: d.arm
+    }));
 
     notes.forEach(note => {
       note.addEventListener('click', () => {
         const index = parseInt(note.dataset.index);
         const isMajor = note.classList.contains('major');
+        const data = isMajor ? majorData[index] : minorData[index];
 
         notes.forEach(n => n.classList.remove('active', 'neighbor'));
         document.querySelectorAll('.rn-badge').forEach(b => b.remove());
         cycle.classList.add('has-selection');
 
-        const prevIdx = (index - 1 + 12) % 12;
-        const nextIdx = (index + 1) % 12;
-
-        const tonique = isMajor ? majorNotes[index] : minorNotes[index];
-        const subDom = isMajor ? majorNotes[prevIdx] : minorNotes[prevIdx];
-        const dom = isMajor ? majorNotes[nextIdx] : minorNotes[nextIdx];
-        const relative = isMajor ? minorNotes[index] : majorNotes[index];
-
-        tonique.classList.add('active');
-        subDom.classList.add('neighbor');
-        dom.classList.add('neighbor');
-        relative.classList.add('neighbor');
-
-        createBadge(tonique, isMajor ? 'I' : 'i', index);
-        createBadge(subDom, isMajor ? 'IV' : 'iv', prevIdx);
-        createBadge(dom, isMajor ? 'V' : 'v', nextIdx);
-        createBadge(relative, isMajor ? 'vi' : 'VI', index);
-
-        armurePanel.innerHTML = armures[index];
-        currentKeyDisplay.innerText = note.dataset.note + (isMajor ? " Majeur" : " mineur");
+        const pos = (off) => (index + off + 12) % 12;
 
         if (isMajor) {
-          relativeInfo.innerText = `Relative mineure : ${minorNames[index]}`;
-          updateChordTable(index, true);
+          highlight(majorNotes[pos(0)], 'I', pos(0));
+          highlight(majorNotes[pos(-1)], 'IV', pos(-1));
+          highlight(majorNotes[pos(1)], 'V', pos(1));
+          highlight(minorNotes[pos(0)], 'vi', pos(0));
+          highlight(minorNotes[pos(-1)], 'ii', pos(-1));
+          highlight(minorNotes[pos(1)], 'iii', pos(1));
+          highlight(minorNotes[pos(2)], 'vii°', pos(2)); 
+          majorNotes[pos(0)].classList.add('active');
         } else {
-          relativeInfo.innerText = `Relative majeure : ${majorNames[index]}`;
-          updateChordTable(index, false);
+          // Mode Mineur : Correction du III et pivot des badges
+          highlight(minorNotes[pos(0)], 'i', pos(0));
+          highlight(minorNotes[pos(-1)], 'iv', pos(-1));
+          highlight(minorNotes[pos(1)], 'v', pos(1));
+          
+          highlight(majorNotes[pos(0)], 'III', pos(0)); 
+          highlight(majorNotes[pos(-1)], 'VI', pos(-1));
+          highlight(majorNotes[pos(1)], 'VII', pos(1));
+          
+          highlight(minorNotes[pos(2)], 'ii°', pos(2));
+          minorNotes[pos(0)].classList.add('active');
         }
+
+        armurePanel.innerHTML = "Armure : " + data.arm;
+        currentKeyDisplay.innerText = data.name + (isMajor ? " Majeur" : " mineur");
+        relativeInfo.innerText = isMajor ? `Relative mineure : ${data.rel}` : `Relative majeure : ${data.rel}`;
+        chordRow.innerHTML = `<tr>${data.chords.map(c => `<td>${c}</td>`).join('')}</tr>`;
       });
     });
 
-    function updateChordTable(index, isMajor) {
-      const p = (i, offset) => (i + offset + 12) % 12;
-      let chords = [];
-      
-      if (isMajor) {
-        // MAJEUR : I, ii, iii, IV, V, vi, vii°
-        // Pour La (3), ii est Sim (index 2 mineur), iii est Do#m (index 4 mineur)
-        chords = [
-          majorNames[index],              // I (La)
-          minorNames[p(index, -1)],       // ii (Sim) -> UN PAS À GAUCHE
-          minorNames[p(index, 1)],        // iii (Do#m) -> UN PAS À DROITE
-          majorNames[p(index, -1)],       // IV (Ré)
-          majorNames[p(index, 1)],        // V (Mi)
-          minorNames[index],              // vi (Fa#m)
-          minorNames[p(index, 2)].replace('m','') + "°" // vii° (Sol#°)
-        ];
-      } else {
-        // MINEUR : i, ii°, III, iv, v, VI, VII
-        chords = [
-          minorNames[index], 
-          minorNames[p(index, 1)].replace('m','') + "°",
-          majorNames[index], 
-          minorNames[p(index, -1)], 
-          minorNames[p(index, 1)], 
-          majorNames[p(index, -1)], 
-          majorNames[p(index, 1)]
-        ];
-      }
-      chordRow.innerHTML = `<tr>${chords.map(c => `<td>${c}</td>`).join('')}</tr>`;
-    }
-
-    function createBadge(parentElement, text, index) {
+    function highlight(el, label, idx) {
+      el.classList.add('neighbor');
       const badge = document.createElement('div');
       badge.className = 'rn-badge';
-      badge.innerText = text;
-      badge.style.setProperty('--i', index);
-      parentElement.appendChild(badge);
+      badge.innerText = label;
+      badge.style.setProperty('--i', idx);
+      el.appendChild(badge);
     }
   </script>
 </body>

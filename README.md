@@ -1,61 +1,59 @@
 # 🎼 Outils Musicaux Interactifs
 
-Une suite d'outils web légers et performants conçus pour aider les musiciens dans leur pratique quotidienne et l'étude de la théorie.
+Une suite d'outils web haute performance, sans dépendances, conçue pour accompagner les musiciens dans l'étude de la théorie, la pratique rythmique et l'entretien de leur instrument.
 
-🚀 **Démos en ligne :**
-* [Accéder au Cycle des Quintes](https://fiorens.github.io/Cycle_Quinte/)
-* [Accéder au Métronome Pro](https://fiorens.github.io/Cycle_Quinte/metronome.html)
+🚀 **Accès rapide aux outils :**
+* [🎡 Cycle des Quintes](https://fiorens.github.io/Cycle_Quinte/index.html)
+* [⏱️ Métronome Pro](https://fiorens.github.io/Cycle_Quinte/metronome.html)
+* [🎸 Accordeur Chromatique](https://fiorens.github.io/Cycle_Quinte/Accordeur.html)
 
 ---
 
-## 🎡 Cycle des Quintes
-Un outil de visualisation harmonique pour explorer les relations entre les tonalités, les armures et les degrés.
+## 🎸 Accordeur Chromatique Pro
+Un analyseur de fréquences en temps réel ultra-précis pour accorder n'importe quel instrument (Guitare, Basse, Violon, Piano).
 
 ### 🌟 Fonctionnalités
-* **Roue de navigation interactive :** Exploration visuelle des 12 tonalités majeures et mineures.
-* **Analyse Harmonique Automatique :** Affiche instantanément les 7 degrés d'une gamme (I, ii, iii, IV, V, vi, vii°).
-* **Dual-Notation :** Switch entre la notation Anglaise (C, D, E...) et Française (Do, Ré, Mi...).
-* **Visualisation des Armures :** Indique précisément le nombre de dièses ou de bémols.
-* **Gestion des Enharmonies :** Support complet des tonalités complexes (ex: Fa♯/Sol♭).
+* **Détection de Pitch Haute Précision :** Utilise un algorithme d'autocorrélation pour isoler la fréquence fondamentale.
+* **Affichage Scientifique :** Affiche la note (Notation Française), l'octave précise (ex: Do 3) et la fréquence exacte en Hz.
+* **Jauge de Précision (Cents) :** Système d'aiguille visuelle pour un réglage fin à +/- 50 cents.
+* **Code Couleur Intelligent :** L'interface passe au **Vert** dès que la note est parfaitement juste (< 5 cents d'écart).
+* **Optimisation Audio :** Désactivation automatique des filtres système (écho/bruit) pour une capture pure de l'instrument.
 
 ---
 
 ## ⏱️ Métronome Universel Pro
-Un métronome de haute précision capable de gérer des structures rythmiques simples ou extrêmement complexes.
+Un métronome capable de gérer des structures rythmiques allant de la simple marche aux mesures complexes de la musique contemporaine.
 
 ### 🌟 Fonctionnalités
-* **Signatures Rythmiques Totales :** Contrôle indépendant du numérateur (1 à 16) et du dénominateur (1, 2, 4, 8, 16, 32, 64).
-* **Gestion Binaire & Ternaire :** Adaptation visuelle et sonore selon l'unité de temps choisie (Noire, Croche, Triolet, etc.).
-* **Pulsations Contrastées :** Différenciation visuelle et sonore entre le **Temps Fort** (Vert/Aigu) et les **Temps Faibles** (Bleu/Grave).
-* **Large Plage de Tempo :** Réglage précis de 30 à 250 BPM.
-* **Indicateurs Dynamiques :** Système de "dots" réactifs pour un suivi visuel parfait de la mesure.
+* **Signatures Rythmiques Totales :** Contrôle indépendant du numérateur (1 à 16) et du dénominateur (1 à 64).
+* **Gestion Binaire & Ternaire :** Adaptation automatique du ressenti visuel et sonore.
+* **Pulsations Contrastées :** Accentuation sonore et visuelle (Vert/Bleu) pour différencier les temps forts des temps faibles.
+* **Large Plage de Tempo :** De 30 à 250 BPM.
+
+---
+
+## 🎡 Cycle des Quintes
+Un outil de visualisation harmonique pour explorer les relations entre les tonalités et les accords.
+
+### 🌟 Fonctionnalités
+* **Roue Interactive :** Navigation fluide entre les 12 tonalités majeures et mineures.
+* **Analyse Harmonique :** Affichage instantané des 7 degrés d'une gamme (I, ii, iii, IV, V, vi, vii°).
+* **Dual-Notation :** Bascule instantanée entre la notation Anglaise (C, D, E...) et Française (Do, Ré, Mi...).
+* **Visualisation des Armures :** Compteur dynamique de dièses et bémols.
 
 ---
 
 ## 🛠️ Détails Techniques
-L'ensemble du projet est développé en **Vanilla JavaScript, HTML5 et CSS3**, garantissant une légèreté et une rapidité d'exécution optimales sans aucune dépendance externe.
+L'intégralité de la suite est développée en **Vanilla JavaScript**, garantissant une exécution instantanée sur n'importe quel navigateur moderne (testé sur Ubuntu 24.04).
 
-* **Web Audio API :** Utilisation d'oscillateurs temps réel pour le métronome, garantissant une précision rythmique absolue et une absence de latence (pas de fichiers .mp3 externes).
-* **Trigonométrie CSS :** Utilisation de `cos()` et `sin()` pour le placement dynamique des notes sur le cercle des quintes.
-* **Interface Responsive :** Design adaptatif via CSS Flexbox et Grid pour une utilisation fluide sur ordinateur, tablette et smartphone (Ubuntu 24.04 friendly).
-
----
-
-## 📖 Comment les utiliser ?
-
-### Cycle des Quintes :
-1.  **Sélectionnez une note** sur le cercle extérieur (Majeur) ou intérieur (mineur).
-2.  **Observez les relations** : L'outil met en évidence la tonique, ses dominantes, ses sous-dominantes et ses relatifs.
-3.  **Consultez le tableau** : Les accords correspondants s'affichent en bas pour faciliter la composition.
-
-### Métronome :
-1.  **Réglez votre signature** : Cliquez sur les chiffres de la fraction pour changer le nombre de temps ou l'unité.
-2.  **Ajustez le tempo** : Utilisez le curseur pour définir votre vitesse de travail.
-3.  **Lancez le rythme** : Appuyez sur DÉMARRER et suivez les indicateurs visuels colorés.
+* **Web Audio API :** * *Synthèse :* Génération de clics via oscillateurs pour le métronome (latence zéro).
+    * *Analyse :* Capture et traitement du flux micro via `AnalyserNode` pour l'accordeur.
+* **Algorithmique :** Implémentation de la transformée de Fourier et de l'autocorrélation pour la détection de pitch.
+* **Zéro Dépendance :** Pas de frameworks, pas de bibliothèques externes, pas de fichiers audio lourds.
 
 ---
 
 ## 🤝 Contribution
-Les suggestions et les rapports de bugs sont les bienvenus ! N'hésitez pas à ouvrir une Issue ou à proposer une Pull Request.
+Le projet est en constante évolution. N'hésitez pas à ouvrir une Issue pour suggérer une amélioration ou à proposer une Pull Request.
 
 Développé avec passion pour les musiciens. 🎹

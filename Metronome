@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métronome</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --bg: #f8f9fa;
+            --white: #ffffff;
+            --accent-fort: #79b94b;
+            --accent-faible: #a0c4ff;
+            --danger: #e74c3c;
+            --grey: #999;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0;
+        }
+
+        .metronome-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 380px;
+            border-top: 10px solid var(--primary);
+        }
+
+        .time-signature {
+            display: flex; flex-direction: column; align-items: center;
+            font-size: 3.5rem; font-weight: 800; line-height: 0.8;
+            cursor: pointer; user-select: none; margin-bottom: 0.5rem;
+        }
+
+        .sig-part { 
+            padding: 5px 25px; 
+            border-radius: 12px; 
+            transition: all 0.2s; 
+            background: #fcfcfc;
+            border: 1px solid transparent;
+        }
+        .sig-part:hover { background: #f0f0f0; border-color: #ddd; color: var(--primary); }
+        .divider { width: 80px; height: 5px; background: #333; margin: 8px 0; border-radius: 2px; }
+
+        .unit-label { font-size: 0.9rem; color: var(--primary); font-weight: 600; margin-bottom: 1.5rem; height: 1.2em; }
+        .label { font-weight: 600; text-transform: uppercase; font-size: 0.7rem; color: var(--grey); letter-spacing: 1px; }
+        
+        .bpm-display { font-size: 4rem; font-weight: 800; margin: 0; color: #333; line-height: 1; }
+
+        .indicator-container {
+            display: flex; justify-content: center; flex-wrap: wrap;
+            gap: 8px; margin: 1.5rem 0; min-height: 70px; align-items: center;
+            background: #fafafa; border-radius: 15px; padding: 10px;
+        }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: #ddd; transition: 0.05s; }
+        .dot:first-child { width: 16px; height: 16px; border: 2px solid #ccc; }
+        .dot.active.fort { background: var(--accent-fort); transform: scale(1.4); box-shadow: 0 0 15px var(--accent-fort); }
+        .dot.active.faible { background: var(--accent-faible); transform: scale(1.2); box-shadow: 0 0 10px var(--accent-faible); }
+
+        .slider { width: 100%; cursor: pointer; margin: 1.5rem 0; }
+
+        .play-btn {
+            width: 100%; padding: 20px; border-radius: 15px; border: none;
+            background: var(--primary); color: white; font-size: 1.2rem;
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .play-btn.playing { background: var(--danger); }
+    </style>
+</head>
+<body>
+
+<div class="metronome-card">
+    <span class="label">Signature</span>
+    <div class="time-signature">
+        <div class="sig-part" id="num" onclick="changeNum()">4</div>
+        <div class="divider"></div>
+        <div class="sig-part" id="den" onclick="changeDen()">4</div>
+    </div>
+    <div class="unit-label" id="unitName">Pulsation à la Noire</div>
+
+    <p class="bpm-display" id="bpmText">120</p>
+    <input type="range" min="30" max="250" value="120" class="slider" id="bpmSlider">
+    
+    <div class="indicator-container" id="indicator"></div>
+
+    <button class="play-btn" id="playBtn">DÉMARRER</button>
+</div>
+
+<script>
+    let bpm = 120;
+    let isPlaying = false;
+    let timer = null;
+    let currentBeat = 0;
+    let num = 4;
+    let den = 4;
+    
+    const denoms = [1, 2, 4, 8, 16, 32, 64];
+    const unitNames = {
+        1: "Ronde", 2: "Blanche", 4: "Noire", 8: "Croche", 
+        16: "Double-Croche", 32: "Triple-Croche", 64: "Quadruple-Croche"
+    };
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function changeNum() {
+        // Limite à 16 maximum
+        num = num >= 16 ? 1 : num + 1;
+        document.getElementById('num').innerText = num;
+        updateUI();
+    }
+
+    function changeDen() {
+        let currentIndex = denoms.indexOf(den);
+        den = denoms[(currentIndex + 1) % denoms.length];
+        document.getElementById('den').innerText = den;
+        document.getElementById('unitName').innerText = "Pulsation à la " + unitNames[den];
+        updateUI();
+    }
+
+    function updateUI() {
+        currentBeat = 0;
+        const container = document.getElementById('indicator');
+        container.innerHTML = '';
+        for (let i = 0; i < num; i++) {
+            const d = document.createElement('div');
+            d.className = 'dot';
+            container.appendChild(d);
+        }
+        if (isPlaying) restart();
+    }
+
+    function playSound() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const isFirst = (currentBeat === 0);
+        
+        osc.frequency.value = isFirst ? 1100 : 700;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((d, i) => {
+            d.classList.remove('active', 'fort', 'faible');
+            if (i === currentBeat) {
+                d.classList.add('active', isFirst ? 'fort' : 'faible');
+            }
+        });
+        currentBeat = (currentBeat + 1) % num;
+    }
+
+    function restart() {
+        clearInterval(timer);
+        timer = setInterval(playSound, (60 / bpm) * 1000);
+    }
+
+    document.getElementById('playBtn').onclick = function() {
+        if (isPlaying) {
+            clearInterval(timer);
+            this.innerText = "DÉMARRER";
+            this.classList.remove('playing');
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active', 'fort', 'faible'));
+            currentBeat = 0;
+        } else {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            restart();
+            this.innerText = "ARRÊTER";
+            this.classList.add('playing');
+        }
+        isPlaying = !isPlaying;
+    };
+
+    document.getElementById('bpmSlider').oninput = function() {
+        bpm = this.value;
+        document.getElementById('bpmText').innerText = bpm;
+        if (isPlaying) restart();
+    };
+
+    updateUI();
+</script>
+</body>
+</html>

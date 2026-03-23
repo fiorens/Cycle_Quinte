@@ -3,7 +3,7 @@
 Une suite d'outils web haute performance, sans dépendances, conçue pour accompagner les musiciens dans l'étude de la théorie, la pratique rythmique et l'entretien de leur instrument.
 
 🚀 **Accès rapide aux outils :**
-* [🎡 Cycle des Quintes](https://fiorens.github.io/Cycle_Quinte/index.html)
+* [🎡 Cycle des Quintes](https://fiorens.github.io/Cycle_Quinte/Cycle.html)
 * [⏱️ Métronome](https://fiorens.github.io/Cycle_Quinte/Metronome.html)
 * [🎸 Accordeur Chromatique](https://fiorens.github.io/Cycle_Quinte/Accordeur.html)
 

@@ -61,7 +61,7 @@
             background: var(--primary);
             border-radius: 3px;
             transform: translateX(-50%);
-            transition: left 0.15s ease-out;
+            transition: left 0.1s linear; /* Transition plus rapide pour la précision */
             z-index: 2;
         }
 
@@ -111,7 +111,6 @@
     const stopBtn = document.getElementById('stopBtn');
     const wlMsg = document.getElementById('wakelockMsg');
 
-    // --- Fonctions Anti-Veille ---
     async function requestWakeLock() {
         try {
             if ('wakeLock' in navigator) {
@@ -132,17 +131,20 @@
         }
     }
 
-    // --- Fonctions Audio ---
     async function start() {
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+                audio: { 
+                    echoCancellation: false, 
+                    noiseSuppression: false, 
+                    autoGainControl: false 
+                } 
             });
             
             let source = audioCtx.createMediaStreamSource(stream);
             analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 4096;
+            analyser.fftSize = 4096; // Haute résolution
             source.connect(analyser);
             
             isRunning = true;
@@ -163,6 +165,7 @@
         stopBtn.style.display = "none";
         document.getElementById('note').innerText = "--";
         document.getElementById('octave').innerText = "";
+        document.getElementById('freqText').innerText = "00.00 Hz";
         document.getElementById('needle').style.left = "50%";
         
         releaseWakeLock();
@@ -174,7 +177,6 @@
         const buffer = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buffer);
         
-        // Seuil de bruit (RMS)
         let sum = 0;
         for (let i = 0; i < buffer.length; i++) sum += buffer[i] * buffer[i];
         let rms = Math.sqrt(sum / buffer.length);
@@ -187,8 +189,8 @@
                 let octave = Math.floor(Math.round(number) / 12) - 1;
                 let cents = (number - Math.round(number)) * 100;
 
-                // Lissage (Buffer de stabilité)
-                lastCents = (lastCents * 0.7) + (cents * 0.3);
+                // Lissage adaptatif pour la stabilité visuelle
+                lastCents = (lastCents * 0.6) + (cents * 0.4);
 
                 document.getElementById('note').innerText = noteStrings[noteIndex];
                 document.getElementById('octave').innerText = octave;
@@ -202,18 +204,37 @@
         requestAnimationFrame(update);
     }
 
+    // Algorithme amélioré avec interpolation parabolique
     function pitchDetection(buffer, sampleRate) {
         let n = buffer.length;
         let correlations = new Float32Array(n);
+        
         for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n - i; j++) correlations[i] += buffer[j] * buffer[j + i];
+            for (let j = 0; j < n - i; j++) {
+                correlations[i] += buffer[j] * buffer[j + i];
+            }
         }
-        let d = 0; while (correlations[d] > correlations[d + 1]) d++;
+
+        let d = 0; 
+        while (correlations[d] > correlations[d + 1]) d++;
+        
         let maxval = -1, maxpos = -1;
         for (let i = d; i < n; i++) {
-            if (correlations[i] > maxval) { maxval = correlations[i]; maxpos = i; }
+            if (correlations[i] > maxval) {
+                maxval = correlations[i];
+                maxpos = i;
+            }
         }
-        return sampleRate / maxpos;
+
+        let T0 = maxpos;
+
+        // --- Interpolation parabolique pour une précision sous le pixel ---
+        let x1 = correlations[T0 - 1], x2 = correlations[T0], x3 = correlations[T0 + 1];
+        let a = (x1 + x3 - 2 * x2) / 2;
+        let b = (x3 - x1) / 2;
+        if (a) T0 = T0 - b / (2 * a);
+
+        return sampleRate / T0;
     }
 
     startBtn.onclick = start;

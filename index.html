@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes - Do en haut</title>
+<title>Cycle des Quintes - Armures Compactes</title>
 <style>
   :root {
     --text-main: #333;
@@ -62,8 +62,6 @@
     font-weight: bold;
     transition: all 0.2s ease;
     z-index: 10;
-    
-    /* CORRECTION : -90deg place l'index 0 en haut (12h) */
     --angle: calc(var(--i) * 30deg - 90deg);
     transform: translate(calc(cos(var(--angle)) * var(--r)), calc(sin(var(--angle)) * var(--r)));
   }
@@ -83,18 +81,20 @@
     border-radius: 50%;
     display: flex; justify-content: center; align-items: center;
     font-size: 0.7rem; font-weight: bold;
-    /* Le badge suit l'angle de la note parente */
     --angle-badge: calc(var(--i) * 30deg - 90deg);
     --r-badge: 25px;
     transform: translate(calc(cos(var(--angle-badge)) * var(--r-badge)), calc(sin(var(--angle-badge)) * var(--r-badge)));
     z-index: 11;
   }
 
+  /* --- ARMURE SUR DEUX LIGNES --- */
   .armure-panel {
     width: 100%; max-width: 600px;
     text-align: center; padding: 15px; margin-bottom: 10px;
     border-bottom: 2px solid var(--grey-light);
-    font-size: 1rem; color: var(--blue-alt); font-weight: 600;
+    font-size: 1.2rem; color: var(--blue-alt); font-weight: 600;
+    line-height: 1.4;
+    min-height: 3.2em; /* Réserve l'espace pour 2 lignes */
   }
 
   .info-panel {
@@ -152,7 +152,7 @@
     </div>
   </div>
 
-  <div id="armure-panel" class="armure-panel">Sélectionnez une note pour commencer</div>
+  <div id="armure-panel" class="armure-panel">Cliquer pour l'armure</div>
 
   <div class="info-panel">
     <div class="info-title">Tonalité : <span id="current-key">-</span></div>
@@ -181,11 +181,20 @@
     const majorNames = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa♯ / Sol♭", "Ré♭", "La♭", "Mi♭", "Si♭", "Fa"];
     const minorNames = ["Lam", "Mim", "Sim", "Fa♯m", "Do♯m", "Sol♯m", "Ré♯m / Mi♭m", "Si♭m", "Fam", "Dom", "Solm", "Rém"];
     
+    // Armures simplifiées sans phrases
     const armures = [
-      "0 altération", "1 dièse (Fa♯)", "2 dièses (Fa♯, Do♯)", "3 dièses (+Sol♯)", 
-      "4 dièses (+Ré♯)", "5 dièses (+La♯)", "6 dièses (Fa♯...Mi♯) / 6 bémols (Si♭...Sol♭)",
-      "5 bémols (Si♭, Mib, Lab, Réb, Solb)", "4 bémols (Si♭, Mib, Lab, Réb)", "3 bémols (Si♭, Mi♭, La♭)", 
-      "2 bémols (Si♭, Mi♭)", "1 bémol (Si♭)"
+      "Naturel<br>aucune altération", 
+      "1♯<br>Fa♯", 
+      "2♯<br>Fa♯, Do♯", 
+      "3♯<br>Fa♯, Do♯, Sol♯", 
+      "4♯<br>Fa♯, Do♯, Sol♯, Ré♯", 
+      "5♯<br>Fa♯, Do♯, Sol♯, Ré♯, La♯", 
+      "6♯ : Fa♯, Do♯, Sol♯, Ré♯, La♯, Mi♯<br>6♭ : Si♭, Mi♭, La♭, Ré♭, Sol♭, Do♭",
+      "5♭<br>Si♭, Mi♭, La♭, Ré♭, Sol♭", 
+      "4♭<br>Si♭, Mi♭, La♭, Ré♭", 
+      "3♭<br>Si♭, Mi♭, La♭", 
+      "2♭<br>Si♭, Mi♭", 
+      "1♭<br>Si♭"
     ];
 
     notes.forEach(note => {
@@ -215,7 +224,8 @@
         createBadge(dom, isMajor ? 'V' : 'v', nextIdx);
         createBadge(relative, isMajor ? 'vi' : 'VI', index);
 
-        armurePanel.innerText = "Armure : " + armures[index];
+        // Affichage sur deux lignes
+        armurePanel.innerHTML = armures[index];
         currentKeyDisplay.innerText = note.dataset.note + (isMajor ? " Majeur" : " mineur");
 
         if (isMajor) {

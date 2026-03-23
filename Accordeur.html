@@ -2,266 +2,153 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Accordeur Chromatique</title>
     <style>
-        :root {
-            --bg: #f8f9fa;
-            --primary: #4a90e2;
-            --accent: #79b94b; /* Vert si accordé */
-            --warning: #f39c12; /* Orange si proche */
-            --danger: #e74c3c; /* Rouge si loin */
-            --grey: #888;
-        }
-
         body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background: var(--bg);
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; color: #333;
+            font-family: sans-serif;
+            background: #121212;
+            color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0;
         }
-
-        .tuner-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 35px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        .card {
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 25px;
             text-align: center;
-            width: 360px;
-            border-bottom: 8px solid #eee;
+            width: 85%;
+            max-width: 350px;
         }
-
-        .note-container {
-            margin-bottom: 0.5rem;
+        #note { font-size: 5rem; font-weight: bold; color: #3498db; margin: 0; }
+        #octave { font-size: 1.5rem; color: #666; }
+        
+        .gauge {
+            width: 100%; height: 50px; background: #222;
+            margin: 20px 0; border-radius: 10px; position: relative; overflow: hidden;
         }
-
-        .note-display {
-            font-size: 5.5rem;
-            font-weight: 900;
-            margin: 0;
-            color: var(--primary);
-            line-height: 1;
-            display: inline-block;
-        }
-
-        .octave-display {
-            font-size: 2rem;
-            font-weight: 600;
-            color: var(--grey);
-            vertical-align: super;
-            margin-left: 5px;
-        }
-
-        .frequency { 
-            font-size: 1.1rem; 
-            color: var(--grey); 
-            margin-bottom: 1.5rem; 
-            font-family: monospace;
-        }
-
-        /* Jauge d'accordage */
-        .gauge-wrapper {
-            position: relative;
-            padding: 20px 0;
-            margin: 1rem 0;
-        }
-
-        .gauge-container {
-            position: relative;
-            width: 100%;
-            height: 12px;
-            background: #eee;
-            border-radius: 6px;
-        }
-
-        .center-mark {
-            position: absolute;
-            left: 50%; top: -10px;
-            width: 4px; height: 32px;
-            background: #ddd;
-            border-radius: 2px;
+        #needle {
+            position: absolute; left: 50%; top: 0;
+            width: 4px; height: 100%; background: #3498db;
             transform: translateX(-50%);
-            z-index: 1;
+            transition: left 0.2s ease-out;
+        }
+        .center-line {
+            position: absolute; left: 50%; width: 2px; height: 100%;
+            background: rgba(255,255,255,0.2); z-index: 1;
         }
 
-        .needle {
-            position: absolute;
-            top: -5px; left: 50%;
-            width: 6px; height: 22px;
-            background: var(--primary);
-            border-radius: 3px;
-            transition: left 0.1s ease-out, background 0.2s;
-            transform: translateX(-50%);
-            z-index: 2;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        .controls { display: flex; gap: 10px; width: 100%; }
+        .btn {
+            flex: 1; padding: 15px; border-radius: 12px; border: none;
+            font-weight: bold; font-size: 1rem; cursor: pointer;
         }
-
-        .scale {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            font-size: 0.7rem;
-            color: #bbb;
-            font-weight: bold;
-        }
-
-        .btn-start {
-            width: 100%; padding: 18px; border-radius: 15px; border: none;
-            background: var(--primary); color: white; font-weight: bold;
-            font-size: 1.1rem; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
-        }
-
-        .btn-start:hover { background: #357abd; transform: translateY(-2px); }
-        .btn-start:active { transform: translateY(0); }
-
-        .status { margin-top: 1.5rem; font-size: 0.85rem; font-weight: 600; color: #aaa; }
+        #startBtn { background: #3498db; color: white; }
+        #stopBtn { background: #e74c3c; color: white; display: none; } /* Caché au début */
+        
+        .freq { font-family: monospace; color: #444; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="tuner-card">
-    <div class="note-container">
-        <span class="note-display" id="note">--</span>
-        <span class="octave-display" id="octave"></span>
-    </div>
-    <div class="frequency" id="freq">0.00 Hz</div>
+<div class="card">
+    <div><span id="note">--</span><span id="octave"></span></div>
+    <div id="freq" class="freq">0.00 Hz</div>
 
-    <div class="gauge-wrapper">
-        <div class="gauge-container">
-            <div class="center-mark"></div>
-            <div id="needle" class="needle"></div>
-        </div>
-        <div class="scale">
-            <span>-50ct</span>
-            <span>ACCORDÉ</span>
-            <span>+50ct</span>
-        </div>
+    <div class="gauge">
+        <div class="center-line"></div>
+        <div id="needle"></div>
     </div>
 
-    <div id="status" class="status">Cliquez pour démarrer</div>
-    <br>
-    <button class="btn-start" id="startBtn">ACTIVER LE MICRO</button>
+    <div class="controls">
+        <button id="startBtn" class="btn">DÉMARRER</button>
+        <button id="stopBtn" class="btn">STOP (COUPER)</button>
+    </div>
 </div>
 
 <script>
-    const noteStrings = ["Do", "Do♯", "Ré", "Ré♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
-    let audioCtx, analyser, dataArray, source;
+    let audioCtx = null, stream = null, analyser = null;
+    let isRunning = false;
+    let lastCents = 0;
 
-    const noteEl = document.getElementById('note');
-    const octaveEl = document.getElementById('octave');
-    const freqEl = document.getElementById('freq');
-    const needleEl = document.getElementById('needle');
-    const statusEl = document.getElementById('status');
     const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
 
-    async function initTuner() {
+    async function start() {
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Configuration micro optimisée pour capturer les fréquences pures
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: {
-                    echoCancellation: false,
-                    noiseSuppression: false,
-                    autoGainControl: false
-                } 
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
             });
-
-            source = audioCtx.createMediaStreamSource(stream);
+            
+            let source = audioCtx.createMediaStreamSource(stream);
             analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 2048;
+            analyser.fftSize = 4096;
             source.connect(analyser);
-
-            dataArray = new Float32Array(analyser.fftSize);
             
-            statusEl.innerText = "À l'écoute...";
-            statusEl.style.color = "var(--accent)";
+            isRunning = true;
             startBtn.style.display = "none";
-            
+            stopBtn.style.display = "block";
             update();
-        } catch (err) {
-            console.error(err);
-            statusEl.innerText = "Erreur : Accès micro refusé";
-            statusEl.style.color = "var(--danger)";
-        }
+        } catch (e) { alert("Micro non détecté. Vérifie les autorisations."); }
     }
 
-    // Algorithme d'autocorrélation (détection de pitch)
-    function autoCorrelate(buffer, sampleRate) {
-        let SIZE = buffer.length;
-        let rms = 0;
-        for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
-        rms = Math.sqrt(rms / SIZE);
-
-        // Si le signal est trop faible, on ne traite pas
-        if (rms < 0.01) return -1;
-
-        let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-        for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
-        for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buffer[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-
-        buffer = buffer.slice(r1, r2);
-        SIZE = buffer.length;
-
-        let c = new Array(SIZE).fill(0);
-        for (let i = 0; i < SIZE; i++)
-            for (let j = 0; j < SIZE - i; j++)
-                c[i] = c[i] + buffer[j] * buffer[j + i];
-
-        let d = 0; while (c[d] > c[d + 1]) d++;
-        let maxval = -1, maxpos = -1;
-        for (let i = d; i < SIZE; i++) {
-            if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
-        }
-        let T0 = maxpos;
-        return sampleRate / T0;
+    function stop() {
+        isRunning = false;
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        if (audioCtx) audioCtx.close();
+        
+        startBtn.style.display = "block";
+        stopBtn.style.display = "none";
+        document.getElementById('note').innerText = "--";
+        document.getElementById('octave').innerText = "";
+        document.getElementById('needle').style.left = "50%";
     }
 
     function update() {
-        analyser.getFloatTimeDomainData(dataArray);
-        let frequency = autoCorrelate(dataArray, audioCtx.sampleRate);
-
-        if (frequency !== -1) {
-            // 1. Calcul de la note MIDI (60 = Do 3)
-            let number = 12 * (Math.log(frequency / 440) / Math.log(2)) + 69;
-            
-            // 2. Index de la note (0 à 11)
+        if (!isRunning) return;
+        const buffer = new Float32Array(analyser.fftSize);
+        analyser.getFloatTimeDomainData(buffer);
+        
+        let freq = pitchDetect(buffer, audioCtx.sampleRate);
+        if (freq > 0) {
+            let number = 12 * (Math.log(freq / 440) / Math.log(2)) + 69;
+            let noteStrings = ["Do", "Do♯", "Ré", "Ré♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
             let noteIndex = Math.round(number) % 12;
-            
-            // 3. Calcul de l'octave
             let octave = Math.floor(Math.round(number) / 12) - 1;
-            
-            // 4. Calcul du décalage (Cents)
-            let cents = Math.floor((number - Math.round(number)) * 100);
+            let cents = (number - Math.round(number)) * 100;
 
-            // Mise à jour de l'affichage
-            noteEl.innerText = noteStrings[noteIndex];
-            octaveEl.innerText = octave;
-            freqEl.innerText = frequency.toFixed(2) + " Hz";
-            
-            // Mise à jour de la jauge (-50% à +50%)
-            let position = 50 + cents;
-            needleEl.style.left = position + "%";
-            
-            // Changement de couleur : Vert si parfait, Rouge si trop loin
-            if (Math.abs(cents) < 5) {
-                needleEl.style.background = "var(--accent)";
-                noteEl.style.color = "var(--accent)";
-            } else if (Math.abs(cents) < 15) {
-                needleEl.style.background = "var(--warning)";
-                noteEl.style.color = "var(--warning)";
-            } else {
-                needleEl.style.background = "var(--danger)";
-                noteEl.style.color = "var(--primary)";
-            }
+            // Lissage pour smartphone
+            lastCents = (lastCents * 0.7) + (cents * 0.3);
+
+            document.getElementById('note').innerText = noteStrings[noteIndex];
+            document.getElementById('octave').innerText = octave;
+            document.getElementById('freq').innerText = freq.toFixed(2) + " Hz";
+            document.getElementById('needle').style.left = (50 + lastCents) + "%";
+            document.getElementById('needle').style.background = Math.abs(lastCents) < 5 ? "#2ecc71" : "#3498db";
         }
-
         requestAnimationFrame(update);
     }
 
-    startBtn.onclick = initTuner;
-</script>
+    function pitchDetect(buffer, sampleRate) {
+        let n = buffer.length, sum = 0;
+        for (let i = 0; i < n; i++) sum += buffer[i] * buffer[i];
+        if (Math.sqrt(sum / n) < 0.02) return -1;
 
+        let correlations = new Float32Array(n);
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n - i; j++) correlations[i] += buffer[j] * buffer[j + i];
+        }
+        let d = 0; while (correlations[d] > correlations[d + 1]) d++;
+        let maxval = -1, maxpos = -1;
+        for (let i = d; i < n; i++) {
+            if (correlations[i] > maxval) { maxval = correlations[i]; maxpos = i; }
+        }
+        return sampleRate / maxpos;
+    }
+
+    startBtn.onclick = start;
+    stopBtn.onclick = stop;
+</script>
 </body>
 </html>

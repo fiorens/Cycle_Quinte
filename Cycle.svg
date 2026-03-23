@@ -1,0 +1,18 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1e1e"/>
+      <stop offset="100%" stop-color="#252525"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="128" fill="url(#grad3)"/>
+  
+  <circle cx="128" cy="128" r="90" stroke="#444" stroke-width="8" stroke-dasharray="20 15"/>
+  
+  <circle cx="128" cy="38" r="10" fill="#ffffff"/> <circle cx="190" cy="58" r="8" fill="#ffffff" opacity="0.7"/> <circle cx="218" cy="128" r="8" fill="#ffffff" opacity="0.7"/> <circle cx="190" cy="198" r="8" fill="#ffffff" opacity="0.7"/> <circle cx="128" cy="218" r="10" fill="#3498db"/> <circle cx="66" cy="198" r="8" fill="#ffffff" opacity="0.7"/>
+  <circle cx="38" cy="128" r="8" fill="#ffffff" opacity="0.7"/>
+  <circle cx="66" cy="58" r="8" fill="#ffffff" opacity="0.7"/>
+
+  <path d="M128 38L190 198L66 198L128 38Z" stroke="#3498db" stroke-width="4" stroke-linejoin="round" opacity="0.5"/>
+  <path d="M128 38L128 218" stroke="#3498db" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+</svg>

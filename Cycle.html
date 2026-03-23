@@ -209,8 +209,21 @@
     const translationMap = { 'C': 'Do', 'D': 'Ré', 'E': 'Mi', 'F': 'Fa', 'G': 'Sol', 'A': 'La', 'B': 'Si' };
 
     function translate(text) {
-      if (!isFrench) return text;
-      return text.replace(/\b[A-G](?=[♯#♭b\s]|$)/g, m => translationMap[m] || m);
+        if (!isFrench) return text;
+        
+        // 1. On protège "Aucune altération"
+        if (text === "Aucune altération") return "Aucune altération";
+    
+        // 2. On utilise des "Dictionnaires" pour éviter les erreurs de cascade
+        // On remplace les notes seulement si elles sont suivies d'une altération, 
+        // d'un espace, d'un minuscule (m/dim) ou si elles sont seules.
+        const map = { 
+            'C': 'Do', 'D': 'Ré', 'E': 'Mi', 'F': 'Fa', 'G': 'Sol', 'A': 'La', 'B': 'Si' 
+        };
+    
+        // La magie : on ne remplace la lettre QUE si c'est une majuscule isolée 
+        // ou le début d'un accord (ex: C#, Dm, Ab)
+        return text.replace(/[A-G](?![a-z][a-z])/g, m => map[m] || m);
     }
 
     const cycle = document.getElementById('cycle');

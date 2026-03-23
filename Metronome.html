@@ -5,129 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Accordeur</title>
     <style>
-        :root {
-            --bg: #121212; /* Mode sombre pour économiser la batterie */
-            --card: #1e1e1e;
-            --primary: #3498db;
-            --accent: #2ecc71;
-            --danger: #e74c3c;
-            --text: #ffffff;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0; overflow: hidden;
+            font-family: sans-serif;
+            background: #121212;
+            color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0;
         }
-
-        .tuner-card {
-            background: var(--card);
+        .card {
+            background: #1e1e1e;
             padding: 2rem;
-            border-radius: 30px;
+            border-radius: 25px;
             text-align: center;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 85%;
+            max-width: 350px;
         }
-
-        .note-display { font-size: 5rem; font-weight: 900; margin: 0; line-height: 1; color: var(--primary); }
-        .octave { font-size: 1.5rem; color: #666; vertical-align: super; }
-        .freq { font-family: monospace; color: #444; margin-bottom: 20px; font-size: 0.9rem; }
-
-        .gauge-container {
-            position: relative;
-            width: 100%;
-            height: 60px;
-            margin: 20px 0;
-            background: #252525;
-            border-radius: 15px;
-            display: flex; align-items: center;
-            overflow: hidden;
+        #note { font-size: 5rem; font-weight: bold; color: #3498db; margin: 0; }
+        #octave { font-size: 1.5rem; color: #666; }
+        
+        .gauge {
+            width: 100%; height: 50px; background: #222;
+            margin: 20px 0; border-radius: 10px; position: relative; overflow: hidden;
         }
-
-        .center-line {
-            position: absolute;
-            left: 50%; width: 2px; height: 100%;
-            background: rgba(255,255,255,0.1);
-            z-index: 1;
-        }
-
         #needle {
-            position: absolute;
-            left: 50%; width: 6px; height: 40px;
-            background: var(--primary);
-            border-radius: 3px;
+            position: absolute; left: 50%; top: 0;
+            width: 4px; height: 100%; background: #3498db;
             transform: translateX(-50%);
-            transition: left 0.2s cubic-bezier(0.1, 0.5, 0.1, 1); /* Mouvement amorti */
-            z-index: 2;
+            transition: left 0.2s ease-out;
+        }
+        .center-line {
+            position: absolute; left: 50%; width: 2px; height: 100%;
+            background: rgba(255,255,255,0.2); z-index: 1;
         }
 
+        .controls { display: flex; gap: 10px; width: 100%; }
         .btn {
-            width: 100%; padding: 20px; border-radius: 20px;
-            border: none; font-size: 1.2rem; font-weight: bold;
-            color: white; cursor: pointer; transition: 0.2s;
-            margin-top: 20px;
+            flex: 1; padding: 15px; border-radius: 12px; border: none;
+            font-weight: bold; font-size: 1rem; cursor: pointer;
         }
-
-        .btn-start { background: var(--primary); }
-        .btn-stop { background: var(--danger); }
-
-        .vumeter-bg { width: 100%; height: 4px; background: #333; margin-top: 15px; border-radius: 2px; }
-        #vumeter { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; transition: width 0.1s; }
+        #startBtn { background: #3498db; color: white; }
+        #stopBtn { background: #e74c3c; color: white; display: none; } /* Caché au début */
+        
+        .freq { font-family: monospace; color: #444; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="tuner-card">
-    <div class="note-display"><span id="note">--</span><span id="octave" class="octave"></span></div>
-    <div class="freq" id="freqText">00.00 Hz</div>
+<div class="card">
+    <div><span id="note">--</span><span id="octave"></span></div>
+    <div id="freq" class="freq">0.00 Hz</div>
 
-    <div class="gauge-container">
+    <div class="gauge">
         <div class="center-line"></div>
         <div id="needle"></div>
     </div>
-    
-    <div class="vumeter-bg"><div id="vumeter"></div></div>
 
-    <button id="mainBtn" class="btn btn-start">DÉMARRER</button>
+    <div class="controls">
+        <button id="startBtn" class="btn">DÉMARRER</button>
+        <button id="stopBtn" class="btn">STOP (COUPER)</button>
+    </div>
 </div>
 
 <script>
-    const noteStrings = ["Do", "Do♯", "Ré", "Ré♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
-    let audioCtx = null, analyser = null, source = null, stream = null;
+    let audioCtx = null, stream = null, analyser = null;
     let isRunning = false;
-    
-    // Système de lissage avancé
-    let centsHistory = [0, 0, 0, 0, 0]; 
+    let lastCents = 0;
 
-    async function toggle() {
-        if (!isRunning) {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: { 
-                        echoCancellation: false, 
-                        noiseSuppression: false, 
-                        autoGainControl: false // Crucial pour la stabilité
-                    } 
-                });
-                
-                source = audioCtx.createMediaStreamSource(stream);
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 4096; // Plus grand pour plus de précision sur mobile
-                source.connect(analyser);
-                
-                isRunning = true;
-                const btn = document.getElementById('mainBtn');
-                btn.innerText = "STOP";
-                btn.className = "btn btn-stop";
-                update();
-            } catch (e) { alert("Micro non autorisé ou non supporté."); }
-        } else {
-            stop();
-        }
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+
+    async function start() {
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+            });
+            
+            let source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 4096;
+            source.connect(analyser);
+            
+            isRunning = true;
+            startBtn.style.display = "none";
+            stopBtn.style.display = "block";
+            update();
+        } catch (e) { alert("Micro non détecté. Vérifie les autorisations."); }
     }
 
     function stop() {
@@ -135,75 +98,57 @@
         if (stream) stream.getTracks().forEach(t => t.stop());
         if (audioCtx) audioCtx.close();
         
-        const btn = document.getElementById('mainBtn');
-        btn.innerText = "DÉMARRER";
-        btn.className = "btn btn-start";
+        startBtn.style.display = "block";
+        stopBtn.style.display = "none";
         document.getElementById('note').innerText = "--";
         document.getElementById('octave').innerText = "";
         document.getElementById('needle').style.left = "50%";
-        document.getElementById('vumeter').style.width = "0%";
     }
 
     function update() {
         if (!isRunning) return;
-
         const buffer = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buffer);
         
-        // Détection de volume
-        let rms = 0;
-        for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
-        rms = Math.sqrt(rms / buffer.length);
-        document.getElementById('vumeter').style.width = Math.min(rms * 800, 100) + "%";
+        let freq = pitchDetect(buffer, audioCtx.sampleRate);
+        if (freq > 0) {
+            let number = 12 * (Math.log(freq / 440) / Math.log(2)) + 69;
+            let noteStrings = ["Do", "Do♯", "Ré", "Ré♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
+            let noteIndex = Math.round(number) % 12;
+            let octave = Math.floor(Math.round(number) / 12) - 1;
+            let cents = (number - Math.round(number)) * 100;
 
-        // Si le signal est trop faible, on ignore
-        if (rms > 0.02) {
-            let freq = pitchDetection(buffer, audioCtx.sampleRate);
-            if (freq > 50 && freq < 2000) {
-                let number = 12 * (Math.log(freq / 440) / Math.log(2)) + 69;
-                let noteIndex = Math.round(number) % 12;
-                let octave = Math.floor(Math.round(number) / 12) - 1;
-                let cents = (number - Math.round(number)) * 100;
+            // Lissage pour smartphone
+            lastCents = (lastCents * 0.7) + (cents * 0.3);
 
-                // Lissage : on garde une moyenne glissante
-                centsHistory.push(cents);
-                centsHistory.shift();
-                let avgCents = centsHistory.reduce((a, b) => a + b) / centsHistory.length;
-
-                document.getElementById('note').innerText = noteStrings[noteIndex];
-                document.getElementById('octave').innerText = octave;
-                document.getElementById('freqText').innerText = freq.toFixed(2) + " Hz";
-                
-                let pos = 50 + (avgCents);
-                document.getElementById('needle').style.left = Math.max(0, Math.min(100, pos)) + "%";
-                
-                // Couleur de l'aiguille
-                document.getElementById('needle').style.background = Math.abs(avgCents) < 5 ? "var(--accent)" : "var(--primary)";
-            }
+            document.getElementById('note').innerText = noteStrings[noteIndex];
+            document.getElementById('octave').innerText = octave;
+            document.getElementById('freq').innerText = freq.toFixed(2) + " Hz";
+            document.getElementById('needle').style.left = (50 + lastCents) + "%";
+            document.getElementById('needle').style.background = Math.abs(lastCents) < 5 ? "#2ecc71" : "#3498db";
         }
         requestAnimationFrame(update);
     }
 
-    function pitchDetection(buffer, sampleRate) {
-        let n = buffer.length;
+    function pitchDetect(buffer, sampleRate) {
+        let n = buffer.length, sum = 0;
+        for (let i = 0; i < n; i++) sum += buffer[i] * buffer[i];
+        if (Math.sqrt(sum / n) < 0.02) return -1;
+
         let correlations = new Float32Array(n);
         for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n - i; j++) {
-                correlations[i] += buffer[j] * buffer[j + i];
-            }
+            for (let j = 0; j < n - i; j++) correlations[i] += buffer[j] * buffer[j + i];
         }
         let d = 0; while (correlations[d] > correlations[d + 1]) d++;
         let maxval = -1, maxpos = -1;
         for (let i = d; i < n; i++) {
-            if (correlations[i] > maxval) {
-                maxval = correlations[i];
-                maxpos = i;
-            }
+            if (correlations[i] > maxval) { maxval = correlations[i]; maxpos = i; }
         }
         return sampleRate / maxpos;
     }
 
-    document.getElementById('mainBtn').onclick = toggle;
+    startBtn.onclick = start;
+    stopBtn.onclick = stop;
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes</title>
+<title>Cycle des Quintes/title>
 <style>
   :root {
     --text-main: #333;
@@ -25,6 +25,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    background: var(--grey-light);
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #ddd;
   }
 
   .wheel-container {
@@ -119,6 +133,10 @@
 </head>
 <body>
 
+  <div class="switch-container" id="notation-switch">
+    Notation : <span id="current-notation">Anglaise (C, D, E...)</span>
+  </div>
+
   <div class="wheel-container">
     <div id="cycle" class="cycle-wheel">
       <div class="note major" style="--i: 0;" data-index="0" data-note="C">C</div>
@@ -166,6 +184,16 @@
   </div>
 
   <script>
+    let isFrench = false;
+    let selectedNoteData = null;
+
+    const translationMap = { 'C': 'Do', 'D': 'Ré', 'E': 'Mi', 'F': 'Fa', 'G': 'Sol', 'A': 'La', 'B': 'Si' };
+
+    function translate(text) {
+      if (!isFrench) return text;
+      return text.replace(/[A-G]/g, m => translationMap[m] || m);
+    }
+
     const cycle = document.getElementById('cycle');
     const notes = document.querySelectorAll('.note');
     const majorNotes = document.querySelectorAll('.note.major');
@@ -174,6 +202,7 @@
     const currentKeyDisplay = document.getElementById('current-key');
     const relativeInfo = document.getElementById('relative-info');
     const chordRow = document.getElementById('chord-row');
+    const switchBtn = document.getElementById('notation-switch');
 
     const majorData = [
       { name: "C", rel: "Am", chords: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"], arm: "Aucune altération" },
@@ -190,18 +219,37 @@
       { name: "F", rel: "Dm", chords: ["F", "Gm", "Am", "B♭", "C", "Dm", "Edim"], arm: "1 bémol : B♭" }
     ];
 
-    const minorData = majorData.map((d, i) => ({
-      name: d.rel,
-      rel: d.name,
-      chords: [d.chords[5], d.chords[6], d.chords[0], d.chords[1], d.chords[2], d.chords[3], d.chords[4]],
-      arm: d.arm
+    const minorData = majorData.map((d) => ({
+      name: d.rel, rel: d.name, arm: d.arm,
+      chords: [d.chords[5], d.chords[6], d.chords[0], d.chords[1], d.chords[2], d.chords[3], d.chords[4]]
     }));
+
+    function refreshUI() {
+      notes.forEach(note => {
+        const rawNote = note.dataset.note;
+        const translatedText = translate(rawNote).replace('/', '<br>');
+        const badges = note.querySelectorAll('.rn-badge');
+        note.innerHTML = translatedText; 
+        badges.forEach(b => note.appendChild(b)); 
+      });
+
+      if (selectedNoteData) {
+        const { data, isMajor } = selectedNoteData;
+        currentKeyDisplay.innerText = translate(data.name) + (isMajor ? " Majeur" : " mineur");
+        relativeInfo.innerText = isMajor ? `Relative mineure : ${translate(data.rel)}` : `Relative majeure : ${translate(data.rel)}`;
+        chordRow.innerHTML = `<tr>${data.chords.map(c => `<td>${translate(c)}</td>`).join('')}</tr>`;
+        armurePanel.innerHTML = "Armure : " + translate(data.arm);
+      }
+      document.getElementById('current-notation').innerText = isFrench ? "Française (Do, Ré, Mi...)" : "Anglaise (C, D, E...)";
+    }
+
+    switchBtn.addEventListener('click', () => { isFrench = !isFrench; refreshUI(); });
 
     notes.forEach(note => {
       note.addEventListener('click', () => {
         const index = parseInt(note.dataset.index);
         const isMajor = note.classList.contains('major');
-        const data = isMajor ? majorData[index] : minorData[index];
+        selectedNoteData = { data: isMajor ? majorData[index] : minorData[index], isMajor };
 
         notes.forEach(n => n.classList.remove('active', 'neighbor'));
         document.querySelectorAll('.rn-badge').forEach(b => b.remove());
@@ -216,26 +264,19 @@
           highlight(minorNotes[pos(0)], 'vi', pos(0));
           highlight(minorNotes[pos(-1)], 'ii', pos(-1));
           highlight(minorNotes[pos(1)], 'iii', pos(1));
-          highlight(minorNotes[pos(2)], 'vii°', pos(2)); 
+          highlight(minorNotes[pos(2)], 'vii°', pos(2));
           majorNotes[pos(0)].classList.add('active');
         } else {
-          // Mode Mineur : Correction du III et pivot des badges
           highlight(minorNotes[pos(0)], 'i', pos(0));
           highlight(minorNotes[pos(-1)], 'iv', pos(-1));
           highlight(minorNotes[pos(1)], 'v', pos(1));
-          
-          highlight(majorNotes[pos(0)], 'III', pos(0)); 
+          highlight(majorNotes[pos(0)], 'III', pos(0));
           highlight(majorNotes[pos(-1)], 'VI', pos(-1));
           highlight(majorNotes[pos(1)], 'VII', pos(1));
-          
           highlight(minorNotes[pos(2)], 'ii°', pos(2));
           minorNotes[pos(0)].classList.add('active');
         }
-
-        armurePanel.innerHTML = "Armure : " + data.arm;
-        currentKeyDisplay.innerText = data.name + (isMajor ? " Majeur" : " mineur");
-        relativeInfo.innerText = isMajor ? `Relative mineure : ${data.rel}` : `Relative majeure : ${data.rel}`;
-        chordRow.innerHTML = `<tr>${data.chords.map(c => `<td>${c}</td>`).join('')}</tr>`;
+        refreshUI();
       });
     });
 
@@ -247,6 +288,7 @@
       badge.style.setProperty('--i', idx);
       el.appendChild(badge);
     }
+    refreshUI();
   </script>
 </body>
 </html>

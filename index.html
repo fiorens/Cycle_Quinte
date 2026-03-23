@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clone - Cycle des Quintes Interactif</title>
+<style>
+  /* --- STYLES CSS BASE --- */
+  :root {
+    --text-main: #333;
+    --grey-dark: #666;
+    --grey-light: #f4f4f4;
+    --green-musicca: #79b94b;
+    --yellow-rn: #fbc02d; 
+    --blue-alt: #4a90e2;
+    
+    --wheel-size: 360px; 
+    --note-size: 55px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-main);
+    background-color: #fff;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .wheel-container {
+    position: relative;
+    width: var(--wheel-size);
+    height: var(--wheel-size);
+    margin: 30px 0;
+  }
+
+  .cycle-wheel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: 
+      radial-gradient(circle, white 30%, transparent 31%),
+      radial-gradient(circle, var(--grey-light) 50%, transparent 51%),
+      radial-gradient(circle, #e0e0e0 70%, transparent 71%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .note {
+    position: absolute;
+    width: var(--note-size);
+    height: var(--note-size);
+    left: 50%;
+    top: 50%;
+    margin-left: calc(var(--note-size) / -2);
+    margin-top: calc(var(--note-size) / -2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    z-index: 10;
+    --angle: calc(var(--i) * 30deg - 90deg);
+    transform: translate(calc(cos(var(--angle)) * var(--r)), calc(sin(var(--angle)) * var(--r)));
+  }
+
+  .note.major { --r: 130px; font-size: 1.2rem; color: var(--text-main); }
+  .note.minor { --r: 85px; font-size: 0.9rem; color: var(--grey-dark); }
+
+  .note.active { background-color: var(--grey-dark) !important; color: white !important; }
+  .note.neighbor { background-color: var(--green-musicca) !important; color: white !important; }
+  .cycle-wheel.has-selection .note:not(.active):not(.neighbor) { opacity: 0.3; }
+
+  .rn-badge {
+    position: absolute;
+    width: 20px; height: 20px;
+    background-color: var(--yellow-rn);
+    color: white;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.7rem; font-weight: bold;
+    --angle-badge: calc(var(--i) * 30deg - 90deg);
+    --r-badge: 25px;
+    transform: translate(calc(cos(var(--angle-badge)) * var(--r-badge)), calc(sin(var(--angle-badge)) * var(--r-badge)));
+    z-index: 11;
+  }
+
+  /* --- NOUVEAU : PANNEAU DES ARMURES --- */
+  .armure-panel {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid var(--grey-light);
+    font-size: 1rem;
+    color: var(--blue-alt);
+    font-weight: 500;
+  }
+
+  .info-panel {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--grey-light);
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+  }
+
+  .info-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
+
+  .chord-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: white;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .chord-table th, .chord-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: center; width: calc(100% / 7); }
+  .chord-table th { background-color: #fafafa; color: var(--grey-dark); font-weight: normal; font-size: 0.9rem; }
+
+  @media (min-width: 600px) {
+    :root { --wheel-size: 480px; --note-size: 70px; }
+    .note.major { --r: 180px; }
+    .note.minor { --r: 120px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wheel-container">
+    <div id="cycle" class="cycle-wheel">
+      <div class="note major" style="--i: 0;" data-index="0" data-note="Do">Do</div>
+      <div class="note major" style="--i: 1;" data-index="1" data-note="Sol">Sol</div>
+      <div class="note major" style="--i: 2;" data-index="2" data-note="Ré">Ré</div>
+      <div class="note major" style="--i: 3;" data-index="3" data-note="La">La</div>
+      <div class="note major" style="--i: 4;" data-index="4" data-note="Mi">Mi</div>
+      <div class="note major" style="--i: 5;" data-index="5" data-note="Si">Si</div>
+      <div class="note major" style="--i: 6;" data-index="6" data-note="Fa♯">Fa♯</div>
+      <div class="note major" style="--i: 7;" data-index="7" data-note="Ré♭">Ré♭</div>
+      <div class="note major" style="--i: 8;" data-index="8" data-note="La♭">La♭</div>
+      <div class="note major" style="--i: 9;" data-index="9" data-note="Mi♭">Mi♭</div>
+      <div class="note major" style="--i: 10;" data-index="10" data-note="Si♭">Si♭</div>
+      <div class="note major" style="--i: 11;" data-index="11" data-note="Fa">Fa</div>
+
+      <div class="note minor" style="--i: 0;" data-index="0" data-note="Lam">Lam</div>
+      <div class="note minor" style="--i: 1;" data-index="1" data-note="Mim">Mim</div>
+      <div class="note minor" style="--i: 2;" data-index="2" data-note="Sim">Sim</div>
+      <div class="note minor" style="--i: 3;" data-index="3" data-note="Fa♯m">Fa♯m</div>
+      <div class="note minor" style="--i: 4;" data-index="4" data-note="Do♯m">Do♯m</div>
+      <div class="note minor" style="--i: 5;" data-index="5" data-note="Sol♯m">Sol♯m</div>
+      <div class="note minor" style="--i: 6;" data-index="6" data-note="Ré♯m">Ré♯m</div>
+      <div class="note minor" style="--i: 7;" data-index="7" data-note="Si♭m">Si♭m</div>
+      <div class="note minor" style="--i: 8;" data-index="8" data-note="Fam">Fam</div>
+      <div class="note minor" style="--i: 9;" data-index="9" data-note="Dom">Dom</div>
+      <div class="note minor" style="--i: 10;" data-index="10" data-note="Solm">Solm</div>
+      <div class="note minor" style="--i: 11;" data-index="11" data-note="Rém">Rém</div>
+    </div>
+  </div>
+
+  <div id="armure-panel" class="armure-panel">Sélectionnez une note pour voir l'armure</div>
+
+  <div class="info-panel">
+    <div class="info-title">Tonalité : <span id="current-key">Cliquez sur une note</span></div>
+    <div id="relative-info" style="color: var(--grey-dark); font-size: 0.9rem;"></div>
+    
+    <table class="chord-table">
+      <thead>
+        <tr><th>I</th><th>ii</th><th>iii</th><th>IV</th><th>V</th><th>vi</th><th>vii°</th></tr>
+      </thead>
+      <tbody id="chord-row">
+        <tr><td colspan="7">Sélectionnez une tonalité</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const cycle = document.getElementById('cycle');
+    const notes = document.querySelectorAll('.note');
+    const majorNotes = document.querySelectorAll('.note.major');
+    const minorNotes = document.querySelectorAll('.note.minor');
+    const armurePanel = document.getElementById('armure-panel');
+    
+    const currentKeyDisplay = document.getElementById('current-key');
+    const relativeInfo = document.getElementById('relative-info');
+    const chordRow = document.getElementById('chord-row');
+
+    const majorNames = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa♯", "Ré♭", "La♭", "Mi♭", "Si♭", "Fa"];
+    const minorNames = ["Lam", "Mim", "Sim", "Fa♯m", "Do♯m", "Sol♯m", "Ré♯m", "Si♭m", "Fam", "Dom", "Solm", "Rém"];
+    
+    // Données des armures
+    const armures = [
+      "0 altération", "1 dièse : Fa♯", "2 dièses : Fa♯, Do♯", "3 dièses : Fa♯, Do♯, Sol♯", 
+      "4 dièses : Fa♯, Do♯, Sol♯, Ré♯", "5 dièses : Fa♯, Do♯, Sol♯, Ré♯, La♯", "6 dièses : Fa♯, Do♯, Sol♯, Ré♯, La♯, Mi♯",
+      "5 bémols : Si♭, Mi♭, La♭, Ré♭, Sol♭", "4 bémols : Si♭, Mi♭, La♭, Ré♭", "3 bémols : Si♭, Mi♭, La♭", 
+      "2 bémols : Si♭, Mi♭", "1 bémol : Si♭"
+    ];
+
+    notes.forEach(note => {
+      note.addEventListener('click', () => {
+        const index = parseInt(note.dataset.index);
+        const isMajor = note.classList.contains('major');
+
+        notes.forEach(n => n.classList.remove('active', 'neighbor'));
+        document.querySelectorAll('.rn-badge').forEach(b => b.remove());
+        cycle.classList.add('has-selection');
+
+        const prevIdx = (index - 1 + 12) % 12;
+        const nextIdx = (index + 1) % 12;
+
+        const tonique = isMajor ? majorNotes[index] : minorNotes[index];
+        const subDom = isMajor ? majorNotes[prevIdx] : minorNotes[prevIdx];
+        const dom = isMajor ? majorNotes[nextIdx] : minorNotes[nextIdx];
+        const relative = isMajor ? minorNotes[index] : majorNotes[index];
+
+        tonique.classList.add('active');
+        subDom.classList.add('neighbor');
+        dom.classList.add('neighbor');
+        relative.classList.add('neighbor');
+
+        createBadge(tonique, isMajor ? 'I' : 'i', index);
+        createBadge(subDom, isMajor ? 'IV' : 'iv', prevIdx);
+        createBadge(dom, isMajor ? 'V' : 'v', nextIdx);
+        createBadge(relative, isMajor ? 'vi' : 'VI', index);
+
+        // Mise à jour de l'armure
+        armurePanel.innerText = "Armure : " + armures[index];
+
+        const keyName = note.dataset.note;
+        currentKeyDisplay.innerText = keyName + (isMajor ? " Majeur" : " mineur");
+
+        if (isMajor) {
+          relativeInfo.innerText = `Relative mineure : ${minorNames[index]}`;
+          updateChordTable(index, true);
+        } else {
+          relativeInfo.innerText = `Relative majeure : ${majorNames[index]}`;
+          updateChordTable(index, false);
+        }
+      });
+    });
+
+    function updateChordTable(index, isMajor) {
+      const p = (i, offset) => (i + offset + 12) % 12;
+      let chords = [];
+      if (isMajor) {
+        chords = [majorNames[index], minorNames[p(index, 1)], minorNames[p(index, 2)], majorNames[p(index, -1)], majorNames[p(index, 1)], minorNames[index], majorNames[p(index, 5)] + "°"];
+      } else {
+        chords = [minorNames[index], majorNames[p(index, 1)] + "°", majorNames[p(index, -1)], minorNames[p(index, -1)], minorNames[p(index, 1)], majorNames[p(index, -2)], majorNames[p(index, -1)]];
+      }
+      chordRow.innerHTML = `<tr>${chords.map(c => `<td>${c}</td>`).join('')}</tr>`;
+    }
+
+    function createBadge(parentElement, text, index) {
+      const badge = document.createElement('div');
+      badge.className = 'rn-badge';
+      badge.innerText = text;
+      badge.style.setProperty('--i', index);
+      parentElement.appendChild(badge);
+    }
+  </script>
+</body>
+</html>

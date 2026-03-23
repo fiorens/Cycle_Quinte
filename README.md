@@ -4,7 +4,7 @@ Une suite d'outils web haute performance, sans dépendances, conçue pour accomp
 
 🚀 **Accès rapide aux outils :**
 * [🎡 Cycle des Quintes](https://fiorens.github.io/Cycle_Quinte/index.html)
-* [⏱️ Métronome Pro](https://fiorens.github.io/Cycle_Quinte/metronome.html)
+* [⏱️ Métronome](https://fiorens.github.io/Cycle_Quinte/Metronome.html)
 * [🎸 Accordeur Chromatique](https://fiorens.github.io/Cycle_Quinte/Accordeur.html)
 
 ---

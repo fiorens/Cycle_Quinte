@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes - Armures Compactes</title>
+<title>Cycle des Quintes - Accords Corrigés</title>
 <style>
   :root {
     --text-main: #333;
@@ -87,14 +87,13 @@
     z-index: 11;
   }
 
-  /* --- ARMURE SUR DEUX LIGNES --- */
   .armure-panel {
     width: 100%; max-width: 600px;
     text-align: center; padding: 15px; margin-bottom: 10px;
     border-bottom: 2px solid var(--grey-light);
     font-size: 1.2rem; color: var(--blue-alt); font-weight: 600;
     line-height: 1.4;
-    min-height: 3.2em; /* Réserve l'espace pour 2 lignes */
+    min-height: 3.2em;
   }
 
   .info-panel {
@@ -181,20 +180,12 @@
     const majorNames = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa♯ / Sol♭", "Ré♭", "La♭", "Mi♭", "Si♭", "Fa"];
     const minorNames = ["Lam", "Mim", "Sim", "Fa♯m", "Do♯m", "Sol♯m", "Ré♯m / Mi♭m", "Si♭m", "Fam", "Dom", "Solm", "Rém"];
     
-    // Armures simplifiées sans phrases
     const armures = [
-      "Naturel<br>aucune altération", 
-      "1♯<br>Fa♯", 
-      "2♯<br>Fa♯, Do♯", 
-      "3♯<br>Fa♯, Do♯, Sol♯", 
-      "4♯<br>Fa♯, Do♯, Sol♯, Ré♯", 
-      "5♯<br>Fa♯, Do♯, Sol♯, Ré♯, La♯", 
+      "Naturel<br>aucune altération", "1♯<br>Fa♯", "2♯<br>Fa♯, Do♯", "3♯<br>Fa♯, Do♯, Sol♯", 
+      "4♯<br>Fa♯, Do♯, Sol♯, Ré♯", "5♯<br>Fa♯, Do♯, Sol♯, Ré♯, La♯", 
       "6♯ : Fa♯, Do♯, Sol♯, Ré♯, La♯, Mi♯<br>6♭ : Si♭, Mi♭, La♭, Ré♭, Sol♭, Do♭",
-      "5♭<br>Si♭, Mi♭, La♭, Ré♭, Sol♭", 
-      "4♭<br>Si♭, Mi♭, La♭, Ré♭", 
-      "3♭<br>Si♭, Mi♭, La♭", 
-      "2♭<br>Si♭, Mi♭", 
-      "1♭<br>Si♭"
+      "5♭<br>Si♭, Mi♭, La♭, Ré♭, Sol♭", "4♭<br>Si♭, Mi♭, La♭, Ré♭", 
+      "3♭<br>Si♭, Mi♭, La♭", "2♭<br>Si♭, Mi♭", "1♭<br>Si♭"
     ];
 
     notes.forEach(note => {
@@ -224,7 +215,6 @@
         createBadge(dom, isMajor ? 'V' : 'v', nextIdx);
         createBadge(relative, isMajor ? 'vi' : 'VI', index);
 
-        // Affichage sur deux lignes
         armurePanel.innerHTML = armures[index];
         currentKeyDisplay.innerText = note.dataset.note + (isMajor ? " Majeur" : " mineur");
 
@@ -241,10 +231,29 @@
     function updateChordTable(index, isMajor) {
       const p = (i, offset) => (i + offset + 12) % 12;
       let chords = [];
+      
       if (isMajor) {
-        chords = [majorNames[index], minorNames[p(index, 1)], minorNames[p(index, 2)], majorNames[p(index, -1)], majorNames[p(index, 1)], minorNames[index], "vii°"];
+        // Degrés Majeurs: I, ii, iii, IV, V, vi, vii°
+        chords = [
+          majorNames[index],              // I
+          minorNames[p(index, 1)],        // ii
+          minorNames[p(index, 2)],        // iii
+          majorNames[p(index, 11)],       // IV (index - 1)
+          majorNames[p(index, 1)],        // V
+          minorNames[index],              // vi
+          majorNames[p(index, 5)] + "°"   // vii°
+        ];
       } else {
-        chords = [minorNames[index], "ii°", majorNames[p(index, -1)], minorNames[p(index, -1)], minorNames[p(index, 1)], majorNames[p(index, -2)], majorNames[p(index, -1)]];
+        // Degrés Mineurs: i, ii°, III, iv, v, VI, VII
+        chords = [
+          minorNames[index],              // i
+          majorNames[p(index, 1)] + "°",  // ii°
+          majorNames[p(index, 11)],       // III (relative majeure de IVm)
+          minorNames[p(index, 11)],       // iv
+          minorNames[p(index, 1)],        // v
+          majorNames[p(index, 10)],       // VI
+          majorNames[p(index, 11)]        // VII
+        ];
       }
       chordRow.innerHTML = `<tr>${chords.map(c => `<td>${c}</td>`).join('')}</tr>`;
     }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes - Correction Enharmonique</title>
+<title>Cycle des Quintes - Do en haut</title>
 <style>
   :root {
     --text-main: #333;
@@ -62,7 +62,9 @@
     font-weight: bold;
     transition: all 0.2s ease;
     z-index: 10;
-    --angle: calc(var(--i) * 30deg - -90deg); /* Changé pour tourner dans le sens des quintes */
+    
+    /* CORRECTION : -90deg place l'index 0 en haut (12h) */
+    --angle: calc(var(--i) * 30deg - 90deg);
     transform: translate(calc(cos(var(--angle)) * var(--r)), calc(sin(var(--angle)) * var(--r)));
   }
 
@@ -81,7 +83,8 @@
     border-radius: 50%;
     display: flex; justify-content: center; align-items: center;
     font-size: 0.7rem; font-weight: bold;
-    --angle-badge: calc(var(--i) * 30deg - -90deg);
+    /* Le badge suit l'angle de la note parente */
+    --angle-badge: calc(var(--i) * 30deg - 90deg);
     --r-badge: 25px;
     transform: translate(calc(cos(var(--angle-badge)) * var(--r-badge)), calc(sin(var(--angle-badge)) * var(--r-badge)));
     z-index: 11;
@@ -89,9 +92,9 @@
 
   .armure-panel {
     width: 100%; max-width: 600px;
-    text-align: center; padding: 10px; margin-bottom: 10px;
+    text-align: center; padding: 15px; margin-bottom: 10px;
     border-bottom: 2px solid var(--grey-light);
-    font-size: 1rem; color: var(--blue-alt); font-weight: 500;
+    font-size: 1rem; color: var(--blue-alt); font-weight: 600;
   }
 
   .info-panel {
@@ -149,7 +152,7 @@
     </div>
   </div>
 
-  <div id="armure-panel" class="armure-panel">Sélectionnez une note</div>
+  <div id="armure-panel" class="armure-panel">Sélectionnez une note pour commencer</div>
 
   <div class="info-panel">
     <div class="info-title">Tonalité : <span id="current-key">-</span></div>
@@ -181,7 +184,7 @@
     const armures = [
       "0 altération", "1 dièse (Fa♯)", "2 dièses (Fa♯, Do♯)", "3 dièses (+Sol♯)", 
       "4 dièses (+Ré♯)", "5 dièses (+La♯)", "6 dièses (Fa♯...Mi♯) / 6 bémols (Si♭...Sol♭)",
-      "5 bémols (Si♭...Ré♭)", "4 bémols (Si♭...Ré♭)", "3 bémols (Si♭, Mi♭, La♭)", 
+      "5 bémols (Si♭, Mib, Lab, Réb, Solb)", "4 bémols (Si♭, Mib, Lab, Réb)", "3 bémols (Si♭, Mi♭, La♭)", 
       "2 bémols (Si♭, Mi♭)", "1 bémol (Si♭)"
     ];
 

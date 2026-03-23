@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle des Quintes - Correction Finale</title>
+<title>Cycle des Quintes - Correctif Accords</title>
 <style>
   :root {
     --text-main: #333;
@@ -233,16 +233,18 @@
       let chords = [];
       
       if (isMajor) {
+        // MAJEUR : I, ii, iii, IV, V, vi, vii°
         chords = [
-          majorNames[index],              // I
-          minorNames[p(index, 1)],        // ii
-          minorNames[p(index, 2)],        // iii
-          majorNames[p(index, 11)],       // IV
-          majorNames[p(index, 1)],        // V
-          minorNames[index],              // vi
-          majorNames[p(index, 5)] + "°"   // vii°
+          majorNames[index],              // I (La)
+          minorNames[p(index, 1)],        // ii (Sim)
+          minorNames[p(index, 2)],        // iii (Do#m)
+          majorNames[p(index, 11)],       // IV (Ré)
+          majorNames[p(index, 1)],        // V (Mi)
+          minorNames[index],              // vi (Fa#m)
+          majorNames[p(index, 5)] + "°"   // vii° (Sol#°)
         ];
       } else {
+        // MINEUR : i, ii°, III, iv, v, VI, VII
         chords = [
           minorNames[index],              // i
           majorNames[p(index, 2)] + "°",  // ii°

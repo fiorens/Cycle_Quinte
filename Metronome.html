@@ -3,192 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Métronome</title>
+    <title>Accordeur Stable</title>
     <style>
         :root {
+            --bg: #f4f7f6;
             --primary: #4a90e2;
-            --bg: #f8f9fa;
-            --white: #ffffff;
-            --accent-fort: #79b94b;
-            --accent-faible: #a0c4ff;
+            --accent: #2ecc71;
+            --warning: #f1c40f;
             --danger: #e74c3c;
-            --grey: #999;
+            --dark: #2c3e50;
         }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0;
         }
 
-        .metronome-card {
-            background: var(--white);
+        .tuner-card {
+            background: white;
             padding: 2.5rem;
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
             text-align: center;
             width: 380px;
-            border-top: 10px solid var(--primary);
+            position: relative;
         }
 
-        .time-signature {
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 3.5rem; font-weight: 800; line-height: 0.8;
-            cursor: pointer; user-select: none; margin-bottom: 0.5rem;
+        .note-display {
+            font-size: 6rem;
+            font-weight: 900;
+            margin: 0;
+            color: var(--dark);
+            transition: color 0.2s;
         }
 
-        .sig-part { 
-            padding: 5px 25px; 
-            border-radius: 12px; 
-            transition: all 0.2s; 
-            background: #fcfcfc;
-            border: 1px solid transparent;
-        }
-        .sig-part:hover { background: #f0f0f0; border-color: #ddd; color: var(--primary); }
-        .divider { width: 80px; height: 5px; background: #333; margin: 8px 0; border-radius: 2px; }
+        .octave { font-size: 2rem; color: #bdc3c7; vertical-align: super; }
 
-        .unit-label { font-size: 0.9rem; color: var(--primary); font-weight: 600; margin-bottom: 1.5rem; height: 1.2em; }
-        .label { font-weight: 600; text-transform: uppercase; font-size: 0.7rem; color: var(--grey); letter-spacing: 1px; }
+        .freq-info { font-family: monospace; color: #95a5a6; margin-bottom: 20px; }
+
+        /* Jauge stabilisée */
+        .gauge-area { margin: 30px 0; position: relative; }
         
-        .bpm-display { font-size: 4rem; font-weight: 800; margin: 0; color: #333; line-height: 1; }
-
-        .indicator-container {
-            display: flex; justify-content: center; flex-wrap: wrap;
-            gap: 8px; margin: 1.5rem 0; min-height: 70px; align-items: center;
-            background: #fafafa; border-radius: 15px; padding: 10px;
+        .gauge-bar {
+            height: 10px; background: #ecf0f1;
+            border-radius: 5px; position: relative;
         }
 
-        .dot { width: 12px; height: 12px; border-radius: 50%; background: #ddd; transition: 0.05s; }
-        .dot:first-child { width: 16px; height: 16px; border: 2px solid #ccc; }
-        .dot.active.fort { background: var(--accent-fort); transform: scale(1.4); box-shadow: 0 0 15px var(--accent-fort); }
-        .dot.active.faible { background: var(--accent-faible); transform: scale(1.2); box-shadow: 0 0 10px var(--accent-faible); }
-
-        .slider { width: 100%; cursor: pointer; margin: 1.5rem 0; }
-
-        .play-btn {
-            width: 100%; padding: 20px; border-radius: 15px; border: none;
-            background: var(--primary); color: white; font-size: 1.2rem;
-            font-weight: bold; cursor: pointer; transition: 0.2s;
+        .needle {
+            position: absolute;
+            top: -10px; left: 50%;
+            width: 4px; height: 30px;
+            background: var(--primary);
+            border-radius: 2px;
+            transform: translateX(-50%);
+            transition: left 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .play-btn.playing { background: var(--danger); }
+
+        .center-line {
+            position: absolute;
+            left: 50%; top: -15px;
+            width: 2px; height: 40px;
+            background: #dfe6e9;
+            transform: translateX(-50%);
+        }
+
+        .controls { margin-top: 30px; }
+
+        .btn {
+            width: 100%; padding: 18px; border-radius: 20px;
+            border: none; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
+        }
+
+        .btn-start { background: var(--primary); color: white; }
+        .btn-stop { background: var(--danger); color: white; }
+        
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .vumeter {
+            height: 4px; width: 0%; background: var(--accent);
+            margin-top: 10px; transition: width 0.1s; border-radius: 2px;
+        }
     </style>
 </head>
 <body>
 
-<div class="metronome-card">
-    <span class="label">Signature</span>
-    <div class="time-signature">
-        <div class="sig-part" id="num" onclick="changeNum()">4</div>
-        <div class="divider"></div>
-        <div class="sig-part" id="den" onclick="changeDen()">4</div>
+<div class="tuner-card">
+    <div class="note-display"><span id="note">--</span><span id="octave" class="octave"></span></div>
+    <div class="freq-info" id="freq">00.00 Hz</div>
+
+    <div class="gauge-area">
+        <div class="center-line"></div>
+        <div class="gauge-bar">
+            <div id="needle" class="needle"></div>
+        </div>
+        <div id="vumeter" class="vumeter"></div>
     </div>
-    <div class="unit-label" id="unitName">Pulsation à la Noire</div>
 
-    <p class="bpm-display" id="bpmText">120</p>
-    <input type="range" min="30" max="250" value="120" class="slider" id="bpmSlider">
-    
-    <div class="indicator-container" id="indicator"></div>
-
-    <button class="play-btn" id="playBtn">DÉMARRER</button>
+    <div class="controls">
+        <button id="toggleBtn" class="btn btn-start">ACTIVER LE MICRO</button>
+    </div>
 </div>
 
 <script>
-    let bpm = 120;
-    let isPlaying = false;
-    let timer = null;
-    let currentBeat = 0;
-    let num = 4;
-    let den = 4;
-    
-    const denoms = [1, 2, 4, 8, 16, 32, 64];
-    const unitNames = {
-        1: "Ronde", 2: "Blanche", 4: "Noire", 8: "Croche", 
-        16: "Double-Croche", 32: "Triple-Croche", 64: "Quadruple-Croche"
-    };
+    const noteStrings = ["Do", "Do♯", "Ré", "Ré♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
+    let audioCtx = null;
+    let analyser = null;
+    let source = null;
+    let stream = null;
+    let isRunning = false;
+    let animationId = null;
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Variables de lissage
+    let lastCents = 0;
+    const smoothing = 0.8; // Plus c'est haut, plus c'est stable (0.1 à 0.9)
 
-    function changeNum() {
-        // Limite à 16 maximum
-        num = num >= 16 ? 1 : num + 1;
-        document.getElementById('num').innerText = num;
-        updateUI();
-    }
-
-    function changeDen() {
-        let currentIndex = denoms.indexOf(den);
-        den = denoms[(currentIndex + 1) % denoms.length];
-        document.getElementById('den').innerText = den;
-        document.getElementById('unitName').innerText = "Pulsation à la " + unitNames[den];
-        updateUI();
-    }
-
-    function updateUI() {
-        currentBeat = 0;
-        const container = document.getElementById('indicator');
-        container.innerHTML = '';
-        for (let i = 0; i < num; i++) {
-            const d = document.createElement('div');
-            d.className = 'dot';
-            container.appendChild(d);
-        }
-        if (isPlaying) restart();
-    }
-
-    function playSound() {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        const isFirst = (currentBeat === 0);
-        
-        osc.frequency.value = isFirst ? 1100 : 700;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-        
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach((d, i) => {
-            d.classList.remove('active', 'fort', 'faible');
-            if (i === currentBeat) {
-                d.classList.add('active', isFirst ? 'fort' : 'faible');
+    async function toggleMicrophone() {
+        if (!isRunning) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } 
+                });
+                
+                source = audioCtx.createMediaStreamSource(stream);
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+                
+                isRunning = true;
+                document.getElementById('toggleBtn').innerText = "COUPER LE MICRO";
+                document.getElementById('toggleBtn').className = "btn btn-stop";
+                update();
+            } catch (err) {
+                alert("Impossible d'accéder au micro : " + err);
             }
-        });
-        currentBeat = (currentBeat + 1) % num;
-    }
-
-    function restart() {
-        clearInterval(timer);
-        timer = setInterval(playSound, (60 / bpm) * 1000);
-    }
-
-    document.getElementById('playBtn').onclick = function() {
-        if (isPlaying) {
-            clearInterval(timer);
-            this.innerText = "DÉMARRER";
-            this.classList.remove('playing');
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active', 'fort', 'faible'));
-            currentBeat = 0;
         } else {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            restart();
-            this.innerText = "ARRÊTER";
-            this.classList.add('playing');
+            stopMicrophone();
         }
-        isPlaying = !isPlaying;
-    };
+    }
 
-    document.getElementById('bpmSlider').oninput = function() {
-        bpm = this.value;
-        document.getElementById('bpmText').innerText = bpm;
-        if (isPlaying) restart();
-    };
+    function stopMicrophone() {
+        isRunning = false;
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        if (audioCtx) audioCtx.close();
+        cancelAnimationFrame(animationId);
+        
+        document.getElementById('toggleBtn').innerText = "ACTIVER LE MICRO";
+        document.getElementById('toggleBtn').className = "btn btn-start";
+        document.getElementById('note').innerText = "--";
+        document.getElementById('octave').innerText = "";
+        document.getElementById('freq').innerText = "00.00 Hz";
+        document.getElementById('needle').style.left = "50%";
+        document.getElementById('vumeter').style.width = "0%";
+    }
 
-    updateUI();
+    function autoCorrelate(buffer, sampleRate) {
+        let rms = 0;
+        for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+        rms = Math.sqrt(rms / buffer.length);
+        
+        // VU-mètre visuel
+        document.getElementById('vumeter').style.width = Math.min(rms * 500, 100) + "%";
+
+        if (rms < 0.015) return -1; // Seuil de silence relevé pour éviter la sensibilité
+
+        let r1 = 0, r2 = buffer.length - 1, thres = 0.2;
+        for (let i = 0; i < buffer.length / 2; i++) if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
+        for (let i = 1; i < buffer.length / 2; i++) if (Math.abs(buffer[buffer.length - i]) < thres) { r2 = buffer.length - i; break; }
+
+        let buf = buffer.slice(r1, r2);
+        let c = new Array(buf.length).fill(0);
+        for (let i = 0; i < buf.length; i++)
+            for (let j = 0; j < buf.length - i; j++)
+                c[i] = c[i] + buf[j] * buf[j + i];
+
+        let d = 0; while (c[d] > c[d + 1]) d++;
+        let maxval = -1, maxpos = -1;
+        for (let i = d; i < buf.length; i++) {
+            if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+        }
+        return sampleRate / maxpos;
+    }
+
+    function update() {
+        if (!isRunning) return;
+
+        const dataArray = new Float32Array(analyser.fftSize);
+        analyser.getFloatTimeDomainData(dataArray);
+        let freq = autoCorrelate(dataArray, audioCtx.sampleRate);
+
+        if (freq !== -1 && freq < 3000) {
+            let number = 12 * (Math.log(freq / 440) / Math.log(2)) + 69;
+            let noteIndex = Math.round(number) % 12;
+            let octave = Math.floor(Math.round(number) / 12) - 1;
+            let cents = (number - Math.round(number)) * 100;
+
+            // LISSAGE : On applique une moyenne pour éviter les sauts
+            lastCents = (lastCents * smoothing) + (cents * (1 - smoothing));
+
+            document.getElementById('note').innerText = noteStrings[noteIndex];
+            document.getElementById('octave').innerText = octave;
+            document.getElementById('freq').innerText = freq.toFixed(2) + " Hz";
+            
+            let pos = 50 + lastCents;
+            document.getElementById('needle').style.left = pos + "%";
+
+            // Couleur dynamique
+            const color = Math.abs(lastCents) < 5 ? "var(--accent)" : (Math.abs(lastCents) < 15 ? "var(--warning)" : "var(--danger)");
+            document.getElementById('needle').style.background = color;
+        }
+
+        animationId = requestAnimationFrame(update);
+    }
+
+    document.getElementById('toggleBtn').onclick = toggleMicrophone;
 </script>
+
 </body>
 </html>

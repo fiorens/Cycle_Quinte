@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Le Compas Harmonique</title>
+    <style>
+        :root {
+            --bg: #0b0f1a; --card: #161b2b; --text: #e2e8f0;
+            --primary: #38bdf8; --pivot: #f472b6; --accent: #10b981; --rock: #f59e0b;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; line-height: 1.5; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .start-station { background: var(--card); border: 1px solid #2d3748; padding: 20px; border-radius: 15px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; }
+        .note-picker { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px; }
+        .note-btn { background: #0b0f1a; border: 1px solid #334155; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .note-btn.active { background: var(--primary); color: #0b0f1a; border-color: var(--primary); }
+        .mode-toggle { display: flex; gap: 10px; align-items: center; }
+        .mode-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid #334155; cursor: pointer; background: transparent; color: #64748b; font-weight: bold; }
+        .mode-btn.active { color: white; border-color: var(--accent); background: rgba(16, 185, 129, 0.1); }
+        .current-context { text-align: center; margin-bottom: 30px; }
+        .current-title { font-size: 2.2rem; font-weight: 900; color: var(--primary); text-transform: uppercase; margin: 0; }
+        .current-info { font-size: 0.9rem; color: #64748b; margin-top: 5px; }
+        .section-title { width: 100%; max-width: 800px; font-size: 0.75rem; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #334155; padding-bottom: 5px; margin: 20px auto 10px; }
+        .chord-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; width: 100%; max-width: 800px; margin: 0 auto 40px; }
+        .chord-card { background: var(--card); border: 1px solid #2d3748; padding: 15px 5px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.3s; border-bottom: 4px solid transparent; }
+        .chord-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+        .chord-card.active { border-color: var(--pivot); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); background: #1e253a; }
+        .chord-card span { display: block; }
+        .deg { font-size: 0.7rem; opacity: 0.5; font-weight: 800; text-transform: uppercase; }
+        .note { font-size: 1.2rem; font-weight: 800; margin-top: 5px; }
+        .pivot-panel { display: none; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; animation: slideUp 0.3s ease; width: 100%; margin-top: 20px; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .door { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #2d3748; display: flex; flex-direction: column; }
+        .door h3 { margin: 0 0 10px 0; font-size: 0.85rem; text-transform: uppercase; color: var(--primary); }
+        .door-desc { font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px; min-height: 40px; }
+        .btn-travel { margin-top: auto; width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--pivot); color: #000; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-travel:hover { background: #f9a8d4; }
+        .sugg-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        .sugg-item { background: #0b0f1a; padding: 10px; border-radius: 8px; font-size: 0.8rem; border: 1px solid #2d3748; text-align: center; }
+        .sugg-item strong { color: var(--primary); display: block; font-size: 1.1rem; }
+        .sugg-item small { color: #64748b; font-size: 0.65rem; text-transform: uppercase; display: block; margin-top: 4px; line-height: 1; }
+        .rock-item { border-color: var(--rock); }
+        .rock-item strong { color: var(--rock); }
+    </style>
+    
+  <link rel="icon" type="image/svg+xml" href="compas.svg">
+</head>
+<body>
+
+<div class="container">
+    <div class="start-station">
+        <div style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; margin-bottom: 10px;">Configuration de départ</div>
+        <div class="note-picker" id="notePicker"></div>
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="btnMaj" onclick="setMode(true)">MAJEUR</button>
+            <button class="mode-btn" id="btnMin" onclick="setMode(false)">MINEUR</button>
+        </div>
+    </div>
+
+    <div class="current-context">
+        <h1 class="current-title" id="displayTitle">DO MAJEUR</h1>
+        <div class="current-info" id="displayRel">Relatif : La mineur</div>
+    </div>
+
+    <div class="section-title">Le Village Actuel (7 Degrés)</div>
+    <div class="chord-grid" id="mainGrid"></div>
+
+    <div id="pivotPanel" class="pivot-panel">
+        <div class="door">
+            <h3>🏠 Rester en <span class="originNoteLabel">Do</span></h3>
+            <div class="door-desc" id="descA">L'accord au sein de votre gamme actuelle.</div>
+            <div class="sugg-list" id="listA"></div>
+        </div>
+
+        <div class="door" id="travelDoor" style="border-color: var(--pivot);">
+            <h3>🚀 Partir vers <span id="targetNoteLabel">Sol</span></h3>
+            <div class="door-desc">Faire de cet accord votre nouveau centre.</div>
+            <div style="font-size: 0.7rem; color: var(--pivot); margin-bottom: 5px; font-weight: bold;">Futurs piliers :</div>
+            <div class="sugg-list" id="listB"></div>
+            <button id="travelBtn" class="btn-travel" style="margin-top:15px;">MODULER</button>
+        </div>
+
+        <div class="door" style="border-color: var(--accent);">
+            <h3>🎸 Styles & Astuces</h3>
+            <div class="door-desc">Enrichir l'arrivée vers <span id="styleTargetLabel">Sol</span>.</div>
+            <div style="font-size: 0.7rem; color: var(--accent); margin-bottom: 8px; font-weight: bold;">Accords "Hors-Piste" :</div>
+            <div class="sugg-list" id="listC"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const notes = ["Do", "Do♯", "Ré", "Ré♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
+    let currentIdx = 0;
+    let isMajor = true;
+
+    const picker = document.getElementById('notePicker');
+    notes.forEach((n, i) => {
+        const btn = document.createElement('button');
+        btn.className = `note-btn ${i === 0 ? 'active' : ''}`;
+        btn.innerText = n;
+        btn.onclick = () => {
+            document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentIdx = i;
+            resetUI();
+        };
+        picker.appendChild(btn);
+    });
+
+    function setMode(val) { isMajor = val; resetUI(); document.getElementById('btnMaj').classList.toggle('active', isMajor); document.getElementById('btnMin').classList.toggle('active', !isMajor); }
+    function resetUI() { document.getElementById('pivotPanel').style.display = 'none'; updateUI(); }
+    function getNote(base, offset) { return notes[(base + offset + 12) % 12]; }
+
+    function updateUI() {
+        const grid = document.getElementById('mainGrid');
+        document.getElementById('displayTitle').innerText = `${getNote(currentIdx, 0)} ${isMajor ? 'MAJEUR' : 'MINEUR'}`;
+        document.getElementById('displayRel').innerText = isMajor ? `Relatif mineur : ${getNote(currentIdx, 9)}m` : `Relatif majeur : ${getNote(currentIdx, 3)}`;
+        document.querySelectorAll('.originNoteLabel').forEach(el => el.innerText = getNote(currentIdx, 0));
+
+        const degs = isMajor ? [
+            {d: "I", o: 0, s: "", c: "#22c55e"}, {d: "ii", o: 2, s: "m", c: "#3b82f6"}, {d: "iii", o: 4, s: "m", c: "#22c55e"},
+            {d: "IV", o: 5, s: "", c: "#3b82f6"}, {d: "V", o: 7, s: "", c: "#ef4444"}, {d: "vi", o: 9, s: "m", c: "#22c55e"}, {d: "vii°", o: 11, s: "dim", c: "#ef4444"}
+        ] : [
+            {d: "i", o: 0, s: "m", c: "#22c55e"}, {d: "ii°", o: 2, s: "dim", c: "#ef4444"}, {d: "III", o: 3, s: "", c: "#22c55e"},
+            {d: "iv", o: 5, s: "m", c: "#3b82f6"}, {d: "V", o: 7, s: "", c: "#ef4444"}, {d: "VI", o: 8, s: "", c: "#3b82f6"}, {d: "VII", o: 10, s: "", c: "#3b82f6"}
+        ];
+
+        grid.innerHTML = degs.map(d => `
+            <div class="chord-card" id="card-${d.d}" style="border-bottom-color: ${d.c}" onclick="openPivot('${d.d}', ${d.o}, '${getNote(currentIdx, d.o)}${d.s}')">
+                <span class="deg">${d.d}</span>
+                <span class="note">${getNote(currentIdx, d.o)}${d.s}</span>
+            </div>
+        `).join('');
+    }
+
+    function openPivot(deg, offset, fullName) {
+        document.getElementById('pivotPanel').style.display = 'grid';
+        document.querySelectorAll('.chord-card').forEach(c => c.classList.remove('active'));
+        document.getElementById('card-'+deg).classList.add('active');
+        document.getElementById('targetNoteLabel').innerText = fullName;
+        document.getElementById('styleTargetLabel').innerText = fullName;
+
+        const listA = document.getElementById('listA');
+        const descA = document.getElementById('descA');
+        let suggA = [];
+
+        // CORRECTION ICI : Ajout du vi (Cadence Rompue) quand on clique sur le V
+        if(deg.toUpperCase() === "V") {
+            descA.innerText = "Tension maximale. Appelle le repos (I) ou la surprise (vi).";
+            suggA = [
+                {n: getNote(currentIdx, 0), r: "Repos (I)"}, 
+                {n: getNote(currentIdx, 9) + (isMajor ? 'm' : ''), r: "Surprise (vi)"}
+            ];
+        } else if(deg.toUpperCase() === "IV" || deg === "iv") {
+            descA.innerText = "Ouverture. Préparez la tension du V ou rentrez au I.";
+            suggA = [{n: getNote(currentIdx, 7), r: "Vers le V"}, {n: getNote(currentIdx, 0), r: "Vers le I"}];
+        } else {
+            descA.innerText = "Accord de liaison. Enrichit la couleur locale.";
+            suggA = [{n: getNote(currentIdx, 7), r: "Vers le V"}, {n: getNote(currentIdx, 5), r: "Vers le IV"}];
+        }
+        listA.innerHTML = suggA.map(s => `<div class="sugg-item"><strong>${s.n}</strong><small>${s.r}</small></div>`).join('');
+
+        const nextBase = (currentIdx + offset) % 12;
+        const travelDoor = document.getElementById('travelDoor');
+        if (offset === 0) {
+            travelDoor.style.opacity = "0.2"; travelDoor.style.pointerEvents = "none";
+        } else {
+            travelDoor.style.opacity = "1"; travelDoor.style.pointerEvents = "all";
+            const suggB = [{n: getNote(nextBase, 7), r: "Futur V"}, {n: getNote(nextBase, 5), r: "Futur IV"}];
+            document.getElementById('listB').innerHTML = suggB.map(s => `<div class="sugg-item"><strong>${s.n}</strong><small>${s.r}</small></div>`).join('');
+            document.getElementById('travelBtn').onclick = () => { currentIdx = nextBase; resetUI(); };
+        }
+
+        const domSec = getNote(nextBase, 7) + "7";
+        const rockChord = getNote(nextBase, -2);
+        const passDim = getNote(nextBase, -1) + "dim";
+        document.getElementById('listC').innerHTML = `
+            <div class="sugg-item rock-item"><strong>${rockChord}</strong><small>Style ROCK (♭VII)</small></div>
+            <div class="sugg-item"><strong>${domSec}</strong><small>Dom. Sec.</small></div>
+            <div class="sugg-item"><strong>${passDim}</strong><small>Lien Diminué</small></div>
+            <div class="sugg-item" style="opacity:0.5; font-size:0.6rem; padding-top:12px">Accords d'approche</div>
+        `;
+    }
+    updateUI();
+</script>
+</body>
+</html>
